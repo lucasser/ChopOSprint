@@ -1,3 +1,7 @@
+/*
+Main code for printer
+*/
+
 #include <Arduino.h>
 #include "stepper.h"
 #include <unordered_map>
