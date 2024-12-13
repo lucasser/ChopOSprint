@@ -1,0 +1,19 @@
+{
+    "axis": [
+        {
+            "id":"x",
+            "motors": [{
+                "pins": [2,15],
+                "direction": true,
+                "maxpos": 400,
+                "steplen": 0.2,
+                "stepsPerRev": 200
+            }],
+            "sensor": {
+                "type": "crtouch",
+                "pwm": 15,
+                "signal": 12
+            }
+        }
+    ]
+}
