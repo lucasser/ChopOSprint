@@ -10,9 +10,8 @@
                 "stepsPerRev": 200
             }],
             "sensor": {
-                "type": "crtouch",
-                "pwm": 15,
-                "signal": 12
+                "type": "limitSwitch",
+                "input": 12
             }
         }
     ]

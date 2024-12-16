@@ -1,10 +1,16 @@
 {
     "axis": [
         {
-            "id":"x",
+            "id":"z",
             "motors": [{
                 "pins": [2,15],
                 "direction": "fwd",
+                "maxpos": 400,
+                "steplen": 0.2,
+                "stepsPerRev": 200
+            }, {
+                "pins": [4,13],
+                "direction": "rev",
                 "maxpos": 400,
                 "steplen": 0.2,
                 "stepsPerRev": 200
