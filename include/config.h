@@ -24,7 +24,7 @@ void loadConfig(JsonDocument& doc) {
 }
 
 
-//custom converter to export json elements as char
+//custom converter to export ArduinoJson elements as char
 namespace ArduinoJson {
 template <>
 struct Converter<char> {

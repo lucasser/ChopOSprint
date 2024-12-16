@@ -1,7 +1,10 @@
-This is the holding folder for configs for different axis specific to your printer. when uploading, paste the json into [../data/config.json]
+# Printer Config
 
-JSON format:
+This is the holding folder for configs that are not used at the moment. Use this folder to store configs for your printer (they will not be uploaded with the code). When uploading code to the ESPs, paste the appropriate json file into [config.json](/data/config.json)
 
+JSON template:
+
+```
 {
     "axis": [
         {
@@ -17,11 +20,12 @@ JSON format:
         }
     ]
 }
+```
 
 axis: an array of axis for the esp to control. Can be any length, as long as the esp has the pins
 
-id: the axis id. current support for x, y, z, e. modify
-[](movecommand::coords), main::axismap and main::AXIS to add more
+id: the axis id. current support for x, y, z, e. modify movecommand::coords in
+[stepper.h](/include/stepper.h) and main::axismap and main::AXIS in [main.cpp](/src/main.cpp) to add more
 
 motors: an array of stepper motors that drive the axis. Can be any length
 
@@ -37,9 +41,10 @@ stepsPerRev: how many steps the motor needs to complete a revolution
 
 sensor: the data for the leveling sensor
 supported sensors: CRTouch, limit switch, no sensor.
-see [sensors](../include/sensors.h) for sensor specific data
+see [sensors](/include/sensors.h) for sensor specific data
 
 sample config file:
+```
 {
     "axis": [
         {
@@ -65,3 +70,4 @@ sample config file:
         }
     ]
 }
+```
