@@ -14,6 +14,7 @@ Header file for everything to do with stepper motors:
 #include "LinkedList.h"
 #include <queue>
 #include "ArduinoJson.h"
+#include "sensors.h"
 
 
 /*driver for individual motors
@@ -63,6 +64,8 @@ class Axis {
         Axis();
         //json object constructor
         Axis(JsonVariant config);
+        //destructor to delete sensor pointer
+        ~Axis();
         //tick all motors
         void tick();
         //move all motors to coordinate
@@ -79,9 +82,15 @@ class Axis {
         bool empty = false;
 
     private:
+
+        //pointer to sensor
+        Sensor* levelSensor;
+
         //register motor using json object
         void setupMotor(JsonVariant stepper);
-        LinkedList<Stepper*> axis = LinkedList<Stepper*>();
+        //add correct sensor type for leveling
+        void setupSensor(JsonVariant sensor);
+        LinkedList<Stepper> axis = LinkedList<Stepper>();
 };
 
 //Empty axis placeholder

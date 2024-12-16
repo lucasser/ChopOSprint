@@ -7,8 +7,9 @@ Stepper::Stepper(int DIR, int STEPS, bool DIRECT): DRV8825(200, DIR, STEPS) {
     }
 }
 
+//[TODO]: add microstep pins
 Stepper::Stepper(JsonVariant stepper): stepLen(stepper["steplen"]), maxPos(stepper["maxpos"]), MOTORSTEPS(stepper["stepsPerRev"]), DRV8825(MOTORSTEPS, stepper["pins"][0], stepper["pins"][1]) {
-    if (!stepper["direction"]) {
+    if (stepper["direction"] == "rev") {
         stepLen *= -1;
     }
 }
@@ -49,6 +50,8 @@ void Stepper::startNextMove() {
     startMove(toMove.dist, toMove.time*1000000L);
 }
 
+
+
 Axis::Axis() {}
 
 Axis::Axis(JsonVariant config) {
@@ -61,31 +64,52 @@ Axis::Axis(JsonVariant config) {
     //sensor
 }
 
+Axis::~Axis() {
+    delete levelSensor;
+}
+
 void Axis::setupMotor(JsonVariant stepper) {
-    axis.add(stepper);
+    Stepper motor(stepper);
+    axis.add(motor);
+}
+
+void Axis::setupSensor(JsonVariant sensor) {
+    char sensorType = sensor["sensor"];
+    switch (sensorType) {
+        case 'crtouch':
+            levelSensor = new CRTouch(sensor["pwm"], sensor["signal"]);
+            break;
+        case 'noSensor':
+            levelSensor = new NoSensor();
+            break;
+        case 'limitSwitch':
+            levelSensor = new LimitSwitch();
+            break;
+        default:
+    }
 }
 
 void Axis::tick() {
     for (int i = 0; i < axis.size(); i++) {
-        axis[i]->tick();
+        axis[i].tick();
     }
 }
 
 void Axis::moveAbsolute(float pos, float time) {
     for (int i = 0; i < axis.size(); i++) {
-        axis[i]->moveAbsolute(pos, time);
+        axis[i].moveAbsolute(pos, time);
     }
 }
 
 void Axis::moveRelative(float pos, float time) {
     for (int i = 0; i < axis.size(); i++) {
-        axis[i]->moveRelative(pos, time);
+        axis[i].moveRelative(pos, time);
     }
 }
 
 void Axis::delay(float time) {
     for (int i = 0; i < axis.size(); i++) {
-        axis[i]->moveRelative(0, time);
+        axis[i].moveRelative(0, time);
     }
 }
 
