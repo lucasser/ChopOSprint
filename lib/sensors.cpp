@@ -3,10 +3,12 @@
 #include "ESP32Servo.h"
 
 
+CRTouch::CRTouch(int pwm, int signal): control(pwm), input(signal) {
+  sensor.attach(control);
+  pinMode(input, INPUT_PULLUP);
+}
 
-CRTouch::CRTouch() {
-    sensor.attach(control);
-    pinMode(input, INPUT_PULLUP);
+void CRTouch::registerInterrupt() {
 }
 
 
@@ -49,3 +51,15 @@ void loop() {
   }
 }
 */
+
+NoSensor::NoSensor() {
+}
+
+void NoSensor::registerInterrupt() {
+}
+
+LimitSwitch::LimitSwitch() {
+}
+
+void LimitSwitch::registerInterrupt() {
+}
