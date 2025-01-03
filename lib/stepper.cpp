@@ -46,7 +46,7 @@ void Axis::loadConfig(JsonVariant config) {
     maxPos = axis["maxpos"];
     stepLen = axis["steplen"];
     offset = axis["0offset"];
-    microstep = stepper["microstep"];
+    microstep = axis["microstep"];
 
     //motors
     JsonArray motors = config["motors"];
