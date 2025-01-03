@@ -15,89 +15,155 @@ Header file for everything to do with stepper motors:
 #include <queue>
 #include "ArduinoJson.h"
 #include "sensors.h"
+#include <vector>
+
+using std::vector;
 
 
 /*driver for individual motors
     driven using distance in millimeters as opposed to steps.
+    time in seconds ([TODO]: remove this and include in func comment)
 */
-class Stepper : public DRV8825{
-    public:
-        //manual constructor
-        Stepper(int DIR, int STEPS, bool DIRECT = true); //[TODO]: pass some object that has all pins, direction, step length, steps per revolution, max pos, everything else
-        //constructor using json object
-        Stepper(JsonVariant stepper);
-        //move to a coordinate
-        void moveAbsolute(float pos, float time);
-        //move a distance
-        void moveRelative(float dist, float time);
-        //set current position to zero
-        void zero();
-        //tick the motor (wait time is built in)
-        void tick();
+// class Sttepper : public DRV8825{
+//     public:
 
-    private:
+//     public:
+//         //manual constructor
+//         Stepper(int DIR, int STEPS, bool DIRECT = true);
+//         //constructor using json object
+//         Stepper(JsonVariant stepper);
+//         //move to a coordinate
+//         void moveAbsolute(float pos, float time);
 
-        struct move {
-            float dist;
-            float time;
-        };
-        float maxPos;
-        float stepLen = 0.2; //not const to set direction
-        int MOTORSTEPS = 200; //steps per revolution
+//         //move a distance
+//         void moveRelative(float dist, float time);
 
-        float curPos = 0; //actual location of motor
-        float projPos = 0; //projected location of motor when the move queue gets evaluated
+//         //set current position to zero
+//         void zero();
+//         //tick the motor (wait time is built in)
+//         void tick();
 
-        //used in tick function to start moves correctly
-        float delay = 0; //how long to wait for next move
-        float startTime; //when move started
+//     private:
+//         float maxPos; //max absolute position of motor
+//         float stepLen = 0.2; //mm per step
+//         int MOTORSTEPS = 200; //steps per revolution
 
-        std::queue<move> moveCommands; //queue of move commands to execute
+//         float curPos = 0; //actual location of motor
+//         float projPos = 0; //projected location of motor when the move queue gets evaluated
 
-        void startNextMove(); //begins next move
-        int mmToSteps(float mm); //convert millimeter input into motor steps
-};
+//         //used in tick function to start moves correctly
+//         float delay = 0; //how long to wait for next move
+//         float startTime; //when move started
 
+//         std::queue<move> moveCommands; //queue of move commands to execute
+
+//         void startNextMove(); //begins next move
+//         int mmToSteps(float mm); //convert millimeter input into motor steps
+// };
+
+/*[TODO]:
+    emergency shutdown
+    level offset
+    detailed comments on all functions (see any cpp func for reference)
+*/
 class Axis {
+    //public functions
     public:
-        //default conssstructor
+        //default constructor
         Axis();
         //json object constructor
         Axis(JsonVariant config);
         //destructor to delete sensor pointer
         ~Axis();
+
+        /**
+         * @brief configure all axis motors and sensors from a JSON config file
+         * @param config JSON config file, see config/README.md
+        */
+        void loadConfig(JsonVariant config);
         //tick all motors
         void tick();
         //move all motors to coordinate
-        void moveAbsolute(float pos, float time);
+        void moveAbsolute(float pos, float time = 0);
+
         //move all motors a set distance
-        void moveRelative(float pos, float time);
+        void moveRelative(float pos, float time = 0);
+
         //wait for other axis to finish move
         void delay(float time);
         //level the axis using custom function
         void level(); //[TODO]: switch which axis, do leveling logic invoking sensors as needed
-        bool isEmpty() {return empty;}
 
-    protected:
-        bool empty = false;
+        //set absolute position of all motors in axis to zero.
+        void zero();
 
+    //helper functions
     private:
-
-        //pointer to sensor
-        Sensor* levelSensor;
-
+        //begins next move
+        void startNextMove();
+        //convert millimeter input into motor steps
+        int mmToSteps(float mm);
         //register motor using json object
         void setupMotor(JsonVariant stepper);
         //add correct sensor type for leveling
         void setupSensor(JsonVariant sensor);
-        LinkedList<Stepper> axis = LinkedList<Stepper>();
-};
+        float suspendPos;
 
-//Empty axis placeholder
-class NOAXIS : public Axis {
+        /** @brief stops all movement
+         *
+         * Saves current position and stashes move queue.
+         * Movement can be resumed from that position with the move queue, or move queue can be trashed.
+         * if moveAbsolute or moveRelative is called without a resume, move queue is automatically trashed
+         */
+        void stop();
+        /// @brief resumes movement after a stop. If called without a stops returns void.
+        /// @param restart if true, trashes move queue, if false, movement is resumed from where the stop was called.
+        void resume(bool restart);
+
+    //public variables
     public:
-        //Empty axis placeholder
-        NOAXIS() {empty = true;};
+        //is the axis configured
+        bool init = false;
+        //pointer to sensor
+        Sensor* levelSensor;
+
+    //internal state variables
+    private:
+        //stores a stepper driver object allong with position data.
+        struct Stepper {
+            float curPos; //location of motor
+            int MOTORSTEPS = 200; //steps per revolution
+            int direction = 1; //1 for forward, -1 for reverse
+            BasicStepperDriver* motor;
+        };
+        //stores move action data
+        struct move {
+            float dist;
+            float time;
+        };
+
+        //set through config//
+        float maxPos; //max absolute position of motor
+        float stepLen = 0.2; //mm per step
+        float offset = 0; //difference between sensor trigger and axis 0 location
+
+        //keep track of location
+        float curPos = 0; //actual location of axis
+        float projPos = 0; //projected location of axis when the move queue gets evaluated
+
+        //used in tick function to start moves correctly
+        float delay = 0; //how long to wait for next move
+        float startTime; //when move started
+
+        //list of motors
+        vector<Stepper> motors = vector<Stepper>();
+
+        std::queue<move> moveCommands; //queue of move commands to execute
+
+        //Suspend data//
+        //queue of move commands stored during suspend
+        std::queue<move> suspendedMoves = {};
+        //position of axis when suspend was called
 };
 
 //contains 4 coordinates for 4 axis, and time for the move. Absolute positions only

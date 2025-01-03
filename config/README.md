@@ -1,5 +1,8 @@
 # Printer Config
 
+[TODO]: specify leveling function inside config
+multiple driver support
+
 This is the holding folder for configs that are not used at the moment. Use this folder to store configs for your printer (they will not be uploaded with the code). When uploading code to the ESPs, paste the appropriate json file into [config.json](/data/config.json)
 
 JSON template:
@@ -22,26 +25,32 @@ JSON template:
 }
 ```
 
-axis: an array of axis for the esp to control. Can be any length, as long as the esp has the pins
+**Axis**: an array of axis for the esp to control. Can be any length, as long as the esp has the pins
 
-id: the axis id. current support for x, y, z, e. modify movecommand::coords in
+**ID**: the axis id. current support for x, y, z, e. modify movecommand::coords in
 [stepper.h](/include/stepper.h) and main::axismap and main::AXIS in [main.cpp](/src/main.cpp) to add more
 
-motors: an array of stepper motors that drive the axis. Can be any length
+**Motors**: an array of stepper motors that drive the axis. Can be any length
 
-pins: array of 2 pin that connect to the motor driver [direction, step]
+**Pins**: array of 2 pin that connect to the motor driver [direction, step]
 
-direction: which direction the motor considers forward. Can be fwd or rev. Fwd is counterclockwise
+**Direction**: which direction the motor considers forward. Can be fwd or rev. Fwd is counterclockwise
 
-maxpos: the maximum position the axis can be at.
+**Maxpos**: the maximum position the axis can be at.
 
-steplen: how many steps it takes to move a millimeter based on your axis control method
+**Steplen**: how many steps it takes to move a millimeter based on your axis control method
 
-stepsPerRev: how many steps the motor needs to complete a revolution
+**StepsPerRev**: how many steps the motor needs to complete a revolution
 
-sensor: the data for the leveling sensor
-supported sensors: CRTouch, limit switch, no sensor.
+**0offset**: difference in millimeters between sensor 0 position and axis 0 position. Can be changed during use through command (not yet implemented)
+
+**Sensor**: the data for the leveling sensor
+supported sensors:
+[X] CRTouch
+[X] limit switch
+[X] no sensor.
 see [sensors](/include/sensors.h) for sensor specific data
+
 
 sample config file:
 ```
@@ -54,13 +63,15 @@ sample config file:
                 "direction": "fwd",
                 "maxpos": 400,
                 "steplen": 0.2,
-                "stepsPerRev": 200
+                "stepsPerRev": 200,
+                "0offset": 0
             }, {
                 "pins": [4,13],
                 "direction": "rev",
                 "maxpos": 400,
                 "steplen": 0.2,
-                "stepsPerRev": 200
+                "stepsPerRev": 200,
+                "0offset": 0
             }],
             "sensor": {
                 "type": "crtouch",

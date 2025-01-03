@@ -1,16 +1,19 @@
 #include "sensors.h"
 #include <Arduino.h>
 #include "ESP32Servo.h"
-
+#include "FunctionalInterrupt.h"
 
 CRTouch::CRTouch(int pwm, int signal): control(pwm), input(signal) {
   sensor.attach(control);
   pinMode(input, INPUT_PULLUP);
 }
 
-void CRTouch::registerInterrupt() {
+void CRTouch::prep() {
+  attachInterrupt(digitalPinToInterrupt(input), std::bind(&Sensor::sensorIsr, this), CHANGE);
 }
 
+void CRTouch::stow() {
+}
 
 /*
 cr touch sensor drive code
@@ -53,13 +56,8 @@ void loop() {
 */
 
 NoSensor::NoSensor() {
-}
-
-void NoSensor::registerInterrupt() {
+  detected = true;
 }
 
 LimitSwitch::LimitSwitch() {
-}
-
-void LimitSwitch::registerInterrupt() {
 }

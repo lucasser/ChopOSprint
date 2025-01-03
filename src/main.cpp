@@ -6,20 +6,9 @@ Main code for printer
 #include "stepper.h"
 #include <unordered_map>
 #include "config.h"
+#include "printer.h"
 
-//this only works for 4 axis. need to change these and moveCommand::coords for more
-std::unordered_map<char, int> axismap{{'x', 0}, {'y', 1}, {'z', 2}, {'e', 3}}; //maps axis name to array index
-std::array<Axis, 4> AXIS = {NOAXIS(), NOAXIS(), NOAXIS(), NOAXIS()};
-
-void setupAxis(JsonDocument& config) {
-  JsonArray axis(config["axis"]);
-  for (JsonVariant i : axis) {
-    char coord = i["id"]; //axis identifier
-    AXIS.at(axismap.find(coord)->second) = Axis(i);
-  }
-  //[TODO]: setup heating stuff
-}
-
+//[TODO]: move to dedicated file REWRITE!!! currently wont parse more than one axis
 //problems arise if given just r10. Always send at least 1 coordinate
 moveCommand parse(String in) {
   float* coord = nullptr; //the coordinate in moveCommand::axis to write to
@@ -55,7 +44,7 @@ void setup() {
   Serial.setTimeout(1);
 
   //register appropriate axis
-  setupAxis(config);
+  Printer(config);
   Serial.println("on");
 }
 
