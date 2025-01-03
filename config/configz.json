@@ -5,7 +5,8 @@
             "axis": {
                 "maxpos": 400,
                 "0offset": 0,
-                "steplen": 0.2
+                "steplen": 0.2,
+                "microstep": 32
             },
             "motors": [{
                 "driver": "DRV8825",

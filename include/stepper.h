@@ -103,6 +103,8 @@ class Axis {
         void startNextMove();
         //convert millimeter input into motor steps
         int mmToSteps(float mm);
+        //convert motor step amount input into mm distance
+        float stepsToMM(float mm);
         //register motor using json object
         void setupMotor(JsonVariant stepper);
         //add correct sensor type for leveling
@@ -147,9 +149,10 @@ class Axis {
         float stepLen = 0.2; //mm per step
         float offset = 0; //difference between sensor trigger and axis 0 location
 
-        //keep track of location
+        //keep track of dynamic axis state
         float curPos = 0; //actual location of axis
         float projPos = 0; //projected location of axis when the move queue gets evaluated
+        int microstep = 1;
 
         //used in tick function to start moves correctly
         float delay = 0; //how long to wait for next move

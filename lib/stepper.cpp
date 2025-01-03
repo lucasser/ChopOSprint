@@ -46,6 +46,7 @@ void Axis::loadConfig(JsonVariant config) {
     maxPos = axis["maxpos"];
     stepLen = axis["steplen"];
     offset = axis["0offset"];
+    microstep = stepper["microstep"];
 
     //motors
     JsonArray motors = config["motors"];
@@ -57,23 +58,29 @@ void Axis::loadConfig(JsonVariant config) {
     setupSensor(config["sensor"]);
     init = true;
 }
-
+//[TODO(maybe)]: add support for enable pin
 void Axis::setupMotor(JsonVariant stepper) {
     Stepper mot;
+
+    mot.MOTORSTEPS = stepper["stepsPerRev"];
+    mot.direction = (stepper["direction"] == "rev") ? -1 : 1;
+    mot.MOTORSTEPS = stepper["stepsPerRev"];
+
     char driver = stepper["driver"];
     switch (driver) {
         case 'DRV8825':
-                mot.motor = new DRV8825();
+                if (stepper["pins"] == 2) {
+                    mot.motor = new DRV8825(mot.MOTORSTEPS, stepper["pins"][0], stepper["pins"][1]);
+                } else {
+                    mot.motor = new DRV8825(mot.MOTORSTEPS, stepper["pins"][0], stepper["pins"][1], stepper["pins"][2], stepper["pins"][3], stepper["pins"][4]);
+                }
             break;
-        //[TODO]: Add more cases
+        //[TODO]: Add more supported drivers
         default:
             return;
     }
-    mot.MOTORSTEPS = stepper["stepsPerRev"];
-    mot.direction = (stepper["direction"] == "rev") ? -1 , 1;
-    mot.MOTORSTEPS = stepper["stepsPerRev"];
 
-    motors.push_back(motorData);
+    motors.push_back(mot);
 }
 
 void Axis::setupSensor(JsonVariant sensor) {
@@ -93,9 +100,6 @@ void Axis::setupSensor(JsonVariant sensor) {
 }
 
 void Axis::tick() {
-    for (auto i : motors) {
-        i.tick();
-    }
     nextAction();
     if ((startTime+delay <= micros()) && !moveCommands.empty()) {
         startNextMove();
@@ -144,6 +148,10 @@ void Axis::resume(bool restart) {
 int Axis::mmToSteps(float mm) {
     int steps = mm/stepLen;
     return steps;
+}
+
+float Axis::stepsToMM(float mm) {
+    return 0.0f;
 }
 
 void Axis::moveAbsolute(float pos, float time) {
