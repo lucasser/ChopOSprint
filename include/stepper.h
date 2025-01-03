@@ -87,24 +87,28 @@ class Axis {
         void moveAbsolute(float pos, float time = 0);
 
         //move all motors a set distance
-        void moveRelative(float pos, float time = 0);
+        void moveRelative(float dist, float time = 0);
 
         //wait for other axis to finish move
         void delay(float time);
         //level the axis using custom function
         void level(); //[TODO]: switch which axis, do leveling logic invoking sensors as needed
 
-        //set absolute position of all motors in axis to zero.
-        void zero();
+        //set absolute position of all motors in axis to zero. [TODO?]:move to private
+        void zero(size_t id = -1);
 
     //helper functions
     private:
         //begins next move
         void startNextMove();
         //convert millimeter input into motor steps
-        int mmToSteps(float mm);
+        int mmToSteps(float mm) {
+            return mm/stepLen*microstep;
+        }
         //convert motor step amount input into mm distance
-        float stepsToMM(float mm);
+        float stepsToMM(int steps) {
+            return steps/microstep*stepLen;
+        }
         //register motor using json object
         void setupMotor(JsonVariant stepper);
         //add correct sensor type for leveling
@@ -150,8 +154,8 @@ class Axis {
         float offset = 0; //difference between sensor trigger and axis 0 location
 
         //keep track of dynamic axis state
-        float curPos = 0; //actual location of axis
-        float projPos = 0; //projected location of axis when the move queue gets evaluated
+        float curPos; //actual location of axis
+        float projPos; //projected location of axis when the move queue gets evaluated
         int microstep = 1;
 
         //used in tick function to start moves correctly

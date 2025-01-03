@@ -36,6 +36,7 @@ Axis::Axis(JsonVariant config) {
     loadConfig(config);
 }
 
+//[TODO]: delete all pointers to motors in motors vector
 Axis::~Axis() {
     delete levelSensor;
 }
@@ -58,7 +59,7 @@ void Axis::loadConfig(JsonVariant config) {
     setupSensor(config["sensor"]);
     init = true;
 }
-//[TODO(maybe)]: add support for enable pin
+//[TODO?]: add support for enable pin
 void Axis::setupMotor(JsonVariant stepper) {
     Stepper mot;
 
@@ -69,7 +70,7 @@ void Axis::setupMotor(JsonVariant stepper) {
     char driver = stepper["driver"];
     switch (driver) {
         case 'DRV8825':
-                if (stepper["pins"] == 2) {
+                if (stepper["pins"].size() == 2) {
                     mot.motor = new DRV8825(mot.MOTORSTEPS, stepper["pins"][0], stepper["pins"][1]);
                 } else {
                     mot.motor = new DRV8825(mot.MOTORSTEPS, stepper["pins"][0], stepper["pins"][1], stepper["pins"][2], stepper["pins"][3], stepper["pins"][4]);
@@ -112,9 +113,9 @@ void Axis::moveAbsolute(float pos, float time) {
     }
 }
 
-void Axis::moveRelative(float pos, float time) {
+void Axis::moveRelative(float dist, float time) {
     for (auto i : motors) {
-        i.moveRelative(pos, time);
+        i.motor->startMove(mmToSteps(dist));
     }
 }
 
@@ -132,9 +133,15 @@ void Axis::level() {
     */
 }
 
-void Axis::zero() {
-    for (auto i : motors) {
-        i.zero();
+void Axis::zero(size_t id = -1) {
+    if (id == -1){
+        for (auto i : motors) {
+            i.curPos = 0;
+        }
+    } else if (id >= motors.size()) {
+        return;
+    } else {
+        motors[id].curPos = 0;
     }
 }
 
@@ -143,15 +150,6 @@ void Axis::stop() {
 }
 
 void Axis::resume(bool restart) {
-}
-
-int Axis::mmToSteps(float mm) {
-    int steps = mm/stepLen;
-    return steps;
-}
-
-float Axis::stepsToMM(float mm) {
-    return 0.0f;
 }
 
 void Axis::moveAbsolute(float pos, float time) {
