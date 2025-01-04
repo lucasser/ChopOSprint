@@ -115,18 +115,17 @@ class Axis {
         void setupMotor(JsonVariant stepper);
         //add correct sensor type for leveling
         void setupSensor(JsonVariant sensor);
-        float suspendPos;
 
         /** @brief stops all movement
          *
          * Saves current position and stashes move queue.
          * Movement can be resumed from that position with the move queue, or move queue can be trashed.
-         * if moveAbsolute or moveRelative is called without a resume, move queue is automatically trashed
+         * if called while Axis is suspended returns void;
          */
         void stop();
         /// @brief resumes movement after a stop. If called without a stops returns void.
-        /// @param restart if true, trashes move queue, if false, movement is resumed from where the stop was called.
-        void resume(bool restart);
+        /// @param trash if true, trashes move queue, if false, movement is resumed from where the stop was called.
+        void resume(bool trash);
 
     //public variables
     public:
@@ -174,8 +173,8 @@ class Axis {
 
         //Suspend data//
         //queue of move commands stored during suspend
-        std::queue<move> suspendedMoves = {};
-        //position of axis when suspend was called
+        std::queue<move> suspendedMoves;
+        bool suspend = false; //is the axis in suspend state
 };
 
 //contains 4 coordinates for 4 axis, and time for the move. Absolute positions only

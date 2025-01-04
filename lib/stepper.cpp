@@ -114,17 +114,16 @@ void Axis::tick() {
 }
 
 void Axis::moveAbsolute(float pos, float time) {
-
+    moveRelative(pos - projPos, time);
 }
 
 void Axis::moveRelative(float dist, float time) {
     moveCommands.push({dist, time});
+    projPos += dist;
 }
 
 void Axis::delay(float time) {
-    for (ALLMOTORS) {
-        i.moveRelative(0, time);
-    }
+    moveRelative(0, time);
 }
 
 void Axis::level() {
@@ -148,10 +147,19 @@ void Axis::zero(size_t id = -1) {
 }
 
 void Axis::stop() {
-
+    if (suspend) {return;}
+    suspendedMoves.push({curPos, 0});
+    for (size_t i = 0; i < moveCommands.size(); i++) {
+        suspendedMoves.push(moveCommands.front());
+    }
+    suspend = true;
 }
 
 void Axis::resume(bool restart) {
+    if (restart) {
+        suspendedMoves = {};
+        suspend = false;
+    }
 }
 
 void Axis::moveAbsolute(float pos, float time) {
