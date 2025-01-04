@@ -145,7 +145,7 @@ void Axis::zero(size_t id = -1) {
         return;
     }
 }
-
+/*
 void Axis::stop() {
     if (suspend) {return;}
     suspendedMoves.push({curPos, 0});
@@ -159,13 +159,10 @@ void Axis::resume(bool restart) {
     if (restart) {
         suspendedMoves = {};
         suspend = false;
-    }
-}
+    } else {
 
-void Axis::moveAbsolute(float pos, float time) {
-    float toMove = pos - projPos;
-    moveRelative(toMove, time);
-}
+    }
+}*/
 
 void Axis::startNextMove() {
     currentMove = moveCommands.front();

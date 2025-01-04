@@ -174,6 +174,7 @@ class Axis {
         //Suspend data//
         //queue of move commands stored during suspend
         std::queue<move> suspendedMoves;
+
         bool suspend = false; //is the axis in suspend state
 };
 
