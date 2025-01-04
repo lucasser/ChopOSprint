@@ -7,8 +7,8 @@ Header file for everything to do with stepper motors:
 
 */
 
-#ifndef Stepper_H
-#define Stepper_H
+#ifndef Axis_H
+#define Axis_H
 
 #include "DRV8825.h"
 #include "LinkedList.h"
@@ -195,4 +195,4 @@ struct moveCommand{
     }
 };
 
-#endif //stepper
+#endif //axis

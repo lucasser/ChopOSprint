@@ -2,7 +2,7 @@
     Different leveling logic functions depending on the axis confuguration
 */
 
-#include "stepper.h"
+#include "axis.h"
 #include "sensor.h"
 #include <Arduino.h>
 
@@ -16,6 +16,7 @@ void level1pos(Axis* axis) {
     while (!axis->levelSensor->detect()) {
         axis->moveRelative(-1);
     }
+    axis->stop();
 }
 
 //level axis that has 2 probing locations and axis communication is over RPI

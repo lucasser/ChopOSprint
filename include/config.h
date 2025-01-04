@@ -4,7 +4,7 @@
 #include <Arduino.h>
 #include "SPIFFS.h"
 #include "ArduinoJson.h"
-#include "stepper.h"
+#include "axis.h"
 
 //load config document from config.json to JsonDocument doc
 void loadConfig(JsonDocument& doc) {

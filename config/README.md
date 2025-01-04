@@ -28,7 +28,7 @@ JSON template:
 **Axis**: an array of axis for the esp to control. Can be any length, as long as the esp has the pins
 
 **ID**: the axis id. current support for x, y, z, e. modify movecommand::coords in
-[stepper.h](/include/stepper.h) and main::axismap and main::AXIS in [main.cpp](/src/main.cpp) to add more
+[axis.h](/include/axis.h) and main::axismap and main::AXIS in [main.cpp](/src/main.cpp) to add more
 
 **Motors**: an array of stepper motors that drive the axis. Can be any length
 

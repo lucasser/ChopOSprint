@@ -1,5 +1,5 @@
 #include "printer.h"
-#include "stepper.h"
+#include "axis.h"
 
 Printer::Printer(JsonDocument& config) {
     setupAxis(config);

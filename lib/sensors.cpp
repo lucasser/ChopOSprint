@@ -8,11 +8,23 @@ CRTouch::CRTouch(int pwm, int signal): control(pwm), input(signal) {
   pinMode(input, INPUT_PULLUP);
 }
 
+
+//[TODO]: lookup actual crtouch commands
 void CRTouch::prep() {
   attachInterrupt(digitalPinToInterrupt(input), std::bind(&Sensor::sensorIsr, this), CHANGE);
+  sensor.write(90);
+  delay(100);
+  sensor.write(160);
+  delay(60);
+  sensor.write(60);
+  delay(10);
+  sensor.write(90);
+  delay(10);
+  sensor.write(10);
 }
 
 void CRTouch::stow() {
+  detachInterrupt(digitalPinToInterrupt(input));
 }
 
 /*
