@@ -61,6 +61,8 @@ using std::vector;
 //         int mmToSteps(float mm); //convert millimeter input into motor steps
 // };
 
+#define ALLMOTORS auto i : motors //macro for iterating through all the motor instances in Axis motors vector. Use i to access each instance
+
 /*[TODO]:
     emergency shutdown
     level offset
@@ -135,17 +137,19 @@ class Axis {
 
     //internal state variables
     private:
+        //stores move action data
+        struct move {
+            float dist; //mm
+            float time; //seconds
+        };
         //stores a stepper driver object allong with position data.
         struct Stepper {
+            float prevActionTime; //the time from which to measure the interval
             float curPos; //location of motor
+            float timeForNextAction; //when to take the next action to not use up CPU unessasaralily
             int MOTORSTEPS = 200; //steps per revolution
             int direction = 1; //1 for forward, -1 for reverse
             BasicStepperDriver* motor;
-        };
-        //stores move action data
-        struct move {
-            float dist;
-            float time;
         };
 
         //set through config//
@@ -153,19 +157,20 @@ class Axis {
         float stepLen = 0.2; //mm per step
         float offset = 0; //difference between sensor trigger and axis 0 location
 
-        //keep track of dynamic axis state
+        //keep track of dynamic axis state//
         float curPos; //actual location of axis
         float projPos; //projected location of axis when the move queue gets evaluated
         int microstep = 1;
 
         //used in tick function to start moves correctly
-        float delay = 0; //how long to wait for next move
+        float moveTime = 0; //how long to wait for next move
         float startTime; //when move started
 
         //list of motors
         vector<Stepper> motors = vector<Stepper>();
 
         std::queue<move> moveCommands; //queue of move commands to execute
+        move currentMove; //the move currently being executed
 
         //Suspend data//
         //queue of move commands stored during suspend

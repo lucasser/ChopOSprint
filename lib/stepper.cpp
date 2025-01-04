@@ -101,26 +101,28 @@ void Axis::setupSensor(JsonVariant sensor) {
 }
 
 void Axis::tick() {
-    nextAction();
-    if ((startTime+delay <= micros()) && !moveCommands.empty()) {
+    for (ALLMOTORS) {
+        if (micros() >= i.timeForNextAction + i.prevActionTime) {
+            i.timeForNextAction = i.motor->nextAction();
+            i.prevActionTime = micros();
+            i.curPos = currentMove.dist - stepsToMM(i.motor->getStepsRemaining());
+        }
+    }
+    if ((startTime + moveTime <= micros()) && !moveCommands.empty()) {
         startNextMove();
     }
 }
 
 void Axis::moveAbsolute(float pos, float time) {
-    for (auto i : motors) {
-        i.moveAbsolute(pos, time);
-    }
+
 }
 
 void Axis::moveRelative(float dist, float time) {
-    for (auto i : motors) {
-        i.motor->startMove(mmToSteps(dist));
-    }
+    moveCommands.push({dist, time});
 }
 
 void Axis::delay(float time) {
-    for (auto i : motors) {
+    for (ALLMOTORS) {
         i.moveRelative(0, time);
     }
 }
@@ -135,13 +137,13 @@ void Axis::level() {
 
 void Axis::zero(size_t id = -1) {
     if (id == -1){
-        for (auto i : motors) {
+        for (ALLMOTORS) {
             i.curPos = 0;
         }
-    } else if (id >= motors.size()) {
-        return;
-    } else {
+    } else if (id < motors.size()) {
         motors[id].curPos = 0;
+    } else {
+        return;
     }
 }
 
@@ -158,10 +160,11 @@ void Axis::moveAbsolute(float pos, float time) {
 }
 
 void Axis::startNextMove() {
-    move toMove = moveCommands.front();
+    currentMove = moveCommands.front();
     moveCommands.pop();
-    curPos += toMove.dist;
-    delay = toMove.time*1000000L;
+    moveTime = currentMove.time*1000000L;
     startTime = micros();
-    startMove(toMove.dist, toMove.time*1000000L);
+    for (ALLMOTORS) {
+        i.motor->startMove(mmToSteps(currentMove.dist), currentMove.time*1000000L);
+    }
 }
