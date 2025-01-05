@@ -99,6 +99,17 @@ class Axis {
         //set absolute position of all motors in axis to zero. [TODO?]:move to private
         void zero(size_t id = -1);
 
+        /** @brief stops all movement
+         *
+         * Saves current position and stashes move queue.
+         * Movement can be resumed from that position with the move queue, or move queue can be trashed.
+         * if called while Axis is suspended returns void;
+         */
+        void stop();
+        /// @brief resumes movement after a stop. If called without a stops returns void.
+        /// @param trash if true, trashes move queue, if false, movement is resumed from where the stop was called.
+        void resume(bool trash);
+
     //helper functions
     private:
         //begins next move
@@ -115,17 +126,6 @@ class Axis {
         void setupMotor(JsonVariant stepper);
         //add correct sensor type for leveling
         void setupSensor(JsonVariant sensor);
-
-        /** @brief stops all movement
-         *
-         * Saves current position and stashes move queue.
-         * Movement can be resumed from that position with the move queue, or move queue can be trashed.
-         * if called while Axis is suspended returns void;
-         */
-        void stop();
-        /// @brief resumes movement after a stop. If called without a stops returns void.
-        /// @param trash if true, trashes move queue, if false, movement is resumed from where the stop was called.
-        void resume(bool trash);
 
     //public variables
     public:
@@ -152,6 +152,7 @@ class Axis {
         };
 
         //set through config//
+        int maxSpeed = 60;
         float maxPos; //max absolute position of motor
         float stepLen = 0.2; //mm per step
         float offset = 0; //difference between sensor trigger and axis 0 location

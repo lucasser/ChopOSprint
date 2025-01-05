@@ -6,7 +6,8 @@
                 "maxpos": 400,
                 "0offset": 0,
                 "steplen": 0.2,
-                "microstep": 32
+                "microstep": 32,
+                "maxspeed": 240
             },
             "motors": [{
                 "driver": "DRV8825",

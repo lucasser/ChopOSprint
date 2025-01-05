@@ -48,6 +48,7 @@ void Axis::loadConfig(JsonVariant config) {
     stepLen = axis["steplen"];
     offset = axis["0offset"];
     microstep = axis["microstep"];
+    maxSpeed = axis["maxspeed"];
 
     //motors
     JsonArray motors = config["motors"];
@@ -65,7 +66,6 @@ void Axis::setupMotor(JsonVariant stepper) {
 
     mot.MOTORSTEPS = stepper["stepsPerRev"];
     mot.direction = (stepper["direction"] == "rev") ? -1 : 1;
-    mot.MOTORSTEPS = stepper["stepsPerRev"];
 
     char driver = stepper["driver"];
     switch (driver) {
@@ -80,7 +80,8 @@ void Axis::setupMotor(JsonVariant stepper) {
         default:
             return;
     }
-
+    mot.motor->setRPM(maxSpeed);
+    mot.motor->setMicrostep(microstep);
     motors.push_back(mot);
 }
 
