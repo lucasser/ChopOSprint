@@ -1,34 +1,6 @@
 #include "axis.h"
 #include <Arduino.h>
 #include "leveling.h"
-/*
-Stepper::Stepper(int DIR, int STEPS, bool DIRECT): DRV8825(200, DIR, STEPS) {
-    if (!DIRECT) {
-        stepLen *= -1;
-    }
-}
-
-//[TODO]: add microstep pins
-Stepper::Stepper(JsonVariant stepper): stepLen(stepper["steplen"]), maxPos(stepper["maxpos"]), MOTORSTEPS(stepper["stepsPerRev"]) {
-    JsonArray pins = stepper["pins"];
-    if (pins.size() == 5) {
-        DRV8825(MOTORSTEPS, pins[0], pins[1], pins[2], pins[3], pins[4]);
-    } else {
-        DRV8825(MOTORSTEPS, stepper["pins"][0], stepper["pins"][1]);
-    }
-    if (stepper["direction"] == "rev") {
-        stepLen *= -1;
-    }
-}
-
-void Stepper::moveRelative(float dist, float time) {
-    float steps = mmToSteps(dist);
-    moveCommands.push({steps, time});
-    projPos += dist;
-}
-*/
-
-
 
 Axis::Axis() {}
 
@@ -60,6 +32,7 @@ void Axis::loadConfig(JsonVariant config) {
     setupSensor(config["sensor"]);
     init = true;
 }
+
 //[TODO?]: add support for enable pin
 void Axis::setupMotor(JsonVariant stepper) {
     Stepper mot;
@@ -106,7 +79,8 @@ void Axis::tick() {
         if (micros() >= i.timeForNextAction + i.prevActionTime) {
             i.timeForNextAction = i.motor->nextAction();
             i.prevActionTime = micros();
-            i.curPos = currentMove.dist - stepsToMM(i.motor->getStepsRemaining());
+            i.curPos += stepsToMM(i.motor->getStepsCompleted() - i.stepsDone);
+            i.stepsDone = i.motor->getStepsCompleted();
         }
     }
     if ((startTime + moveTime <= micros()) && !moveCommands.empty()) {
@@ -115,12 +89,11 @@ void Axis::tick() {
 }
 
 void Axis::moveAbsolute(float pos, float time) {
-    moveRelative(pos - projPos, time);
+    moveCommands.push({'a', pos, time});
 }
 
 void Axis::moveRelative(float dist, float time) {
-    moveCommands.push({dist, time});
-    projPos += dist;
+    moveCommands.push({'r', dist, time});
 }
 
 void Axis::delay(float time) {
@@ -142,8 +115,6 @@ void Axis::zero(size_t id = -1) {
         }
     } else if (id < motors.size()) {
         motors[id].curPos = 0;
-    } else {
-        return;
     }
 }
 /*
@@ -171,6 +142,6 @@ void Axis::startNextMove() {
     moveTime = currentMove.time*1000000L;
     startTime = micros();
     for (ALLMOTORS) {
-        i.motor->startMove(mmToSteps(currentMove.dist), currentMove.time*1000000L);
+        i.beginMove(currentMove, this);
     }
 }

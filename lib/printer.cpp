@@ -2,13 +2,14 @@
 #include "axis.h"
 
 Printer::Printer(JsonDocument& config) {
-    setupAxis(config);
+  setupAxis(config);
 }
 
 void Printer::setupAxis(JsonVariant config) {
   JsonArray axis(config["axis"]);
   for (JsonVariant i : axis) {
-    AXIS.at(axismap.find(i["id"])->second).loadConfig(i);
+    char id = i["id"];
+    AXIS.at(AXISBYID).loadConfig(i);
   }
   //[TODO]: setup heating stuff
 }
@@ -21,8 +22,8 @@ Axis* Printer::getAxis(int id) {
 }
 
 Axis* Printer::getAxis(char id) {
-  if (AXIS.at(axismap.find(id)->second).init) {
-    return &AXIS.at(axismap.find(id)->second);
+  if (AXIS.at(AXISBYID).init) {
+    return &AXIS.at(AXISBYID);
   }
   return nullptr;
 }

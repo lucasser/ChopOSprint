@@ -3,6 +3,8 @@
 
 #include <unordered_map>
 
+#define AXISBYID axismap.find(id)->second //lookup the correct axis by char id
+
 class Printer {
     public:
         Printer(JsonDocument& config);
