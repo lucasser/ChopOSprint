@@ -57,15 +57,22 @@ class Axis {
          * @brief Set absolute position of specified motor in axis to offset.
          * @param id Id of motor to zero. leave empty to zero all of them
          */
-        void zero(size_t id = -1);
+        void zero(int id = -1);
+
+        /*
+         * hard break. deletes move queue, stops axis immediately
+         * use in all cases unless actually printing
+        */
+        void stop();
 
         /** @brief stops all movement
          *
          * Saves current position and stashes move queue.
          * Movement can be resumed from that position with the move queue, or move queue can be trashed.
-         * if called while Axis is suspended returns void;
+         * if called while Axis is suspended returns void and does not stop;
          */
-        void stop();
+        void suspend();
+
         /// @brief resumes movement after a stop. If called without a stops returns void.
         /// @param trash if true, trashes move queue, if false, movement is resumed from where the stop was called.
         void resume(bool trash);
@@ -153,7 +160,7 @@ class Axis {
         //positions that motors were stopped on
         vector<float> stopPos;
 
-        bool suspend = false; //is the axis in suspend state
+        bool suspended = false; //is the axis in suspend state
 };
 
 //contains 4 coordinates for 4 axis, and time for the move. Absolute positions only

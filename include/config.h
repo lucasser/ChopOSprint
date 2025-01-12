@@ -1,3 +1,11 @@
+/***************************
+
+Has two functions. load config, and update config
+Load config reads a config file under /data/config.json and saves it to the JsonDocument doc
+Update config [TODO] takes path to a key and a value, and sets that key to the specified value in the config.json file.
+
+****************************/
+
 #ifndef CONFIG_H
 #define CONFIG_H
 
@@ -39,6 +47,5 @@ namespace ArduinoJson {
     }
   };
 }
-
 
 #endif

@@ -83,13 +83,13 @@ void Axis::tick() {
             i.stepsDone = i.motor->getStepsCompleted();
         }
     }
-    if ((startTime + moveTime <= micros()) && !moveCommands.empty() && !suspend) {
+    if ((startTime + moveTime <= micros()) && !moveCommands.empty() && !suspended) {
         startNextMove();
     }
 }
 
 void Axis::moveAbsolute(float pos, float time) {
-    if (suspend) {
+    if (suspended) {
         for (ALLMOTORS) {
             i.beginMove({'a', pos, time}, this);
         }
@@ -98,7 +98,7 @@ void Axis::moveAbsolute(float pos, float time) {
 }
 
 void Axis::moveRelative(float dist, float time) {
-    if (suspend) {
+    if (suspended) {
         for (ALLMOTORS) {
             i.beginMove({'r', dist, time}, this);
         }
@@ -117,7 +117,7 @@ void Axis::level() {
     */
 }
 
-void Axis::zero(size_t id = -1) {
+void Axis::zero(int id = -1) {
     if (id == -1){
         for (ALLMOTORS) {
             i.curPos = offset;
@@ -131,23 +131,31 @@ void Axis::stop() {
     for (ALLMOTORS) {
         i.motor->stop();
     }
+    if (!suspended) {
+        currentMove = {};
+        moveCommands = {};
+    }
+}
 
+void Axis::suspend() {
+    if (suspended) {return;}
+    suspended = true;
+    stop();
     //if under suspend, just stop all motors, if not store the data
-    if (suspend) {return;}
     stopPos = {};
     for (ALLMOTORS) {
         stopPos.push_back(i.curPos); //save stopped position
     }
-    suspend = true;
 }
 
 void Axis::resume(bool restart) {
-    stop(); //make sure theres no movement;
-    if (restart) { //slear and reset everything
+    if (!suspended) {return;}
+    stop(); //make sure there's no movement;
+    if (restart) { //clear and reset everything
         currentMove = {};
         moveCommands = {};
         stopPos = {};
-        suspend = false;
+        suspended = false;
     } else {
         std::queue<move> temp = moveCommands;
         moveCommands = {};
@@ -163,7 +171,7 @@ void Axis::resume(bool restart) {
         }
         moveTime = 5000000L;
         startTime = micros();
-        suspend = false;
+        suspended = false;
     }
 }
 

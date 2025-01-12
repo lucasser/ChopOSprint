@@ -20,7 +20,6 @@ void level1pos(Axis* axis) {
     axis->levelSensor->stow();
     axis->zero();
     axis->moveRelative(10);
-    axis->resume(true);
     axis->levelSensor->prep();
     while (!axis->levelSensor->detect()) {
         axis->moveRelative(-1, 0.5); //[TODO?]: adjust speed
@@ -28,7 +27,6 @@ void level1pos(Axis* axis) {
     axis->stop();
     axis->levelSensor->stow();
     axis->zero();
-    axis->resume(true);
 }
 
 //level axis that has 2 probing locations and axis communication is over RPI
