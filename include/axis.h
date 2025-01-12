@@ -54,7 +54,7 @@ class Axis {
         void level(); //[TODO]: switch which axis, do leveling logic invoking sensors as needed
 
         //set absolute position of all motors in axis to zero. [TODO?]:move to private
-        void zero(size_t id = -1);
+        void zero(float offset, size_t id = -1);
 
         /** @brief stops all movement
          *
