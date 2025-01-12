@@ -1,7 +1,6 @@
 /*
 ALL UNITS IN MM!!!
 Header file for everything to do with stepper motors:
-    Custom stepper driver class that can convert distance to steps
     Axis class for controlling multiple steppers together
     supporting struct to pass coordinates for next move
 
@@ -113,10 +112,10 @@ class Axis {
             void beginMove(Axis::move move, Axis* axis) {
                 switch (move.type) {
                 case 'r':
-                    motor->startMove(axis->mmToSteps(move.dist), move.time*1000000L);
+                    motor->startMove(direction*axis->mmToSteps(move.dist), move.time*1000000L);
                     break;
                 case 'a':
-                    motor->startMove(axis->mmToSteps(move.dist) - curPos, move.time*1000000L);
+                    motor->startMove(direction*(axis->mmToSteps(move.dist) - curPos), move.time*1000000L);
                     break;
                 default:
                     return;
@@ -138,18 +137,18 @@ class Axis {
         int microstep = 1; //the microstepping situation
 
         //used in tick function to start moves correctly
-        float moveTime = 0; //how long to wait for next move
+        long moveTime = 0; //how long to wait for next move
         float startTime; //when move started
 
         //list of motors
-        vector<Stepper> motors = vector<Stepper>();
+        vector<Stepper> motors;
 
         std::queue<move> moveCommands; //queue of move commands to execute
         move currentMove; //the move currently being executed
 
         //Suspend data//
-        //queue of move commands stored during suspend
-        std::queue<move> suspendedMoves;
+        //positions that motors were stopped on
+        vector<float> stopPos;
 
         bool suspend = false; //is the axis in suspend state
 };

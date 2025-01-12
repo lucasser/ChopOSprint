@@ -1,6 +1,7 @@
 #include "axis.h"
 #include <Arduino.h>
 #include "leveling.h"
+#include "../config/config.h"
 
 Axis::Axis() {}
 
@@ -83,7 +84,7 @@ void Axis::tick() {
             i.stepsDone = i.motor->getStepsCompleted();
         }
     }
-    if ((startTime + moveTime <= micros()) && !moveCommands.empty()) {
+    if ((startTime + moveTime <= micros()) && !moveCommands.empty() && !suspend) {
         startNextMove();
     }
 }
@@ -117,24 +118,46 @@ void Axis::zero(size_t id = -1) {
         motors[id].curPos = 0;
     }
 }
-/*
+
 void Axis::stop() {
+    for (ALLMOTORS) {
+        i.motor->stop();
+    }
+
+    //if under suspend, just stop all motors, if not store the data
     if (suspend) {return;}
-    suspendedMoves.push({curPos, 0});
-    for (size_t i = 0; i < moveCommands.size(); i++) {
-        suspendedMoves.push(moveCommands.front());
+    stopPos = {};
+    for (ALLMOTORS) {
+        stopPos.push_back(i.curPos); //save stopped position
     }
     suspend = true;
 }
 
 void Axis::resume(bool restart) {
-    if (restart) {
-        suspendedMoves = {};
+    stop(); //make sure theres no movement;
+    if (restart) { //slear and reset everything
+        currentMove = {};
+        moveCommands = {};
+        stopPos = {};
         suspend = false;
     } else {
-
+        std::queue<move> temp = moveCommands;
+        moveCommands = {};
+        moveCommands.push(currentMove);
+        while (!temp.empty()) {
+            moveCommands.push(temp.front());
+            temp.pop();
+        }
+        int j = 0;
+        for (ALLMOTORS) {
+            i.beginMove({'a', stopPos.at(j), RESETTIME}, this);
+            j++;
+        }
+        moveTime = 5000000L;
+        startTime = micros();
+        suspend = false;
     }
-}*/
+}
 
 void Axis::startNextMove() {
     currentMove = moveCommands.front();
