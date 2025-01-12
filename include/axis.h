@@ -52,9 +52,11 @@ class Axis {
         void delay(float time);
         //level the axis using custom function
         void level(); //[TODO]: switch which axis, do leveling logic invoking sensors as needed
-
-        //set absolute position of all motors in axis to zero. [TODO?]:move to private
-        void zero(float offset, size_t id = -1);
+        /**
+         * @brief Set absolute position of specified motor in axis to offset.
+         * @param id Id of motor to zero. leave empty to zero all of them
+         */
+        void zero(size_t id = -1);
 
         /** @brief stops all movement
          *

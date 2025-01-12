@@ -104,7 +104,6 @@ void Axis::delay(float time) {
 void Axis::level() {
     /*
         correct level function
-        zero();
         tell RPI im done?
     */
 }
@@ -112,10 +111,10 @@ void Axis::level() {
 void Axis::zero(size_t id = -1) {
     if (id == -1){
         for (ALLMOTORS) {
-            i.curPos = 0;
+            i.curPos = offset;
         }
     } else if (id < motors.size()) {
-        motors[id].curPos = 0;
+        motors[id].curPos = offset;
     }
 }
 
