@@ -25,9 +25,6 @@
 #ifndef Sensors_H
 #define Sensors_H
 
-//special interrupt function
-//void IRAM_ATTR isr() {detected = true;}
-
 //abstract sensor class
 class Sensor {
     public:
@@ -65,9 +62,11 @@ class NoSensor : public Sensor {
 //a simple limit switch.
 class LimitSwitch : public Sensor {
     public:
-        LimitSwitch();
+        LimitSwitch(int signal);
         void prep(); //register interrupt
         void stow(); //remove interrupt
+    private:
+        int input; //the input pin
 };
 
 //[TODO]: something for extruder
