@@ -1,7 +1,11 @@
 #ifndef PRINTER_H
 #define PRINTER_H
 
-#include <unordered_map>
+//[TODO]: return error if config is invalid
+
+#include "../config/config.h"
+#include "ArduinoJson.h"
+#include "unordered_map"
 
 #define AXISBYID axismap.find(id)->second //lookup the correct axis by char id
 
@@ -24,10 +28,8 @@ class Printer {
 
 
     private:
-        //[TODO]: array amount should be set by a header
-        //this only works for 4 axis. need to change these and moveCommand::coords for more
-        const std::unordered_map<char, int> axismap{{'x', 0}, {'y', 1}, {'z', 2}, {'e', 3}}; //maps axis name to array index
-        std::array<Axis, 4> AXIS = {}; //Stores all the axis controlled by the esp. Do not pass Asis by value, only by refference.
+        const std::unordered_map<char, int> axismap = AXISORDER; //maps axis name to array index
+        std::array<Axis, AXISAMOUNT> AXIS = {}; //Stores all the axis controlled by the esp. Do not pass Asis by value, only by refference.
 };
 
 #endif //PRINTER_H

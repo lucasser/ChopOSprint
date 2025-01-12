@@ -15,6 +15,7 @@ Header file for everything to do with stepper motors:
 #include "ArduinoJson.h"
 #include "sensors.h"
 #include <vector>
+#include "../config/config.h"
 
 using std::vector;
 
@@ -157,9 +158,8 @@ class Axis {
 
 //contains 4 coordinates for 4 axis, and time for the move. Absolute positions only
 struct moveCommand{
-    std::array<float, 4> coords = {NAN, NAN, NAN, NAN}; //x, y, z, e. Add values for more axis
+    std::array<float, AXISAMOUNT> coords; //x, y, z, e. Add values for more axis
     float time;
-
     String toString() {
         String out = "time: ";
         out += time;

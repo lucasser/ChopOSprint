@@ -1,7 +1,6 @@
 #include "axis.h"
 #include <Arduino.h>
 #include "leveling.h"
-#include "../config/config.h"
 
 Axis::Axis() {}
 
@@ -69,7 +68,7 @@ void Axis::setupSensor(JsonVariant sensor) {
             levelSensor = new NoSensor();
             break;
         case 'limitSwitch':
-            levelSensor = new LimitSwitch();
+            levelSensor = new LimitSwitch(int(sensor["signal"]));
             break;
         default:
     }
@@ -90,10 +89,20 @@ void Axis::tick() {
 }
 
 void Axis::moveAbsolute(float pos, float time) {
+    if (suspend) {
+        for (ALLMOTORS) {
+            i.beginMove({'a', pos, time}, this);
+        }
+    }
     moveCommands.push({'a', pos, time});
 }
 
 void Axis::moveRelative(float dist, float time) {
+    if (suspend) {
+        for (ALLMOTORS) {
+            i.beginMove({'r', dist, time}, this);
+        }
+    }
     moveCommands.push({'r', dist, time});
 }
 

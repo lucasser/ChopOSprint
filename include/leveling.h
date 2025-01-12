@@ -21,6 +21,7 @@ void level1pos(Axis* axis) {
     axis->zero();
     axis->moveRelative(10);
     axis->resume(true);
+    axis->levelSensor->prep();
     while (!axis->levelSensor->detect()) {
         axis->moveRelative(-1, 0.5); //[TODO?]: adjust speed
     }
