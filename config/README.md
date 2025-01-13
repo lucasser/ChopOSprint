@@ -46,9 +46,10 @@ JSON template:
 
 **Sensor**: the data for the leveling sensor
 supported sensors:
-[X] CRTouch
-[X] limit switch
-[X] no sensor.
+- [x] CRTouch
+- [x] limit switch
+- [x] no sensor.
+
 see [sensors](/include/sensors.h) for sensor specific data
 
 

@@ -26,10 +26,14 @@ class Printer {
         **/
         Axis* getAxis(int id);
 
+        //processes the input string and figures out what to do
+        void strProccess(String in);
+
+        moveCommand Printer::parse(String in);
 
     private:
         const std::unordered_map<char, int> axismap = AXISORDER; //maps axis name to array index
-        std::array<Axis, AXISAMOUNT> AXIS = {}; //Stores all the axis controlled by the esp. Do not pass Asis by value, only by refference.
+        std::array<Axis, AXISAMOUNT> AXIS = {}; //Stores all the axis controlled by the esp. Do not pass Axis by value, only by refference.
 };
 
 #endif //PRINTER_H
