@@ -88,26 +88,17 @@ void Axis::tick() {
     }
 }
 
-void Axis::moveAbsolute(float pos, float time) {
+void Axis::generalMove(move move) {
     if (suspended) {
         for (ALLMOTORS) {
-            i.beginMove({'a', pos, time}, this);
+            i.beginMove(move, this);
         }
     }
-    moveCommands.push({'a', pos, time});
-}
-
-void Axis::moveRelative(float dist, float time) {
-    if (suspended) {
-        for (ALLMOTORS) {
-            i.beginMove({'r', dist, time}, this);
-        }
-    }
-    moveCommands.push({'r', dist, time});
+    moveCommands.push(move);
 }
 
 void Axis::delay(float time) {
-    moveRelative(0, time);
+    generalMove({'r', 0, time});
 }
 
 void Axis::level() {

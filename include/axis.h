@@ -27,6 +27,12 @@ using std::vector;
     detailed comments on all functions (see any cpp func for reference)
 */
 class Axis {
+    //stores move action data
+    struct move {
+        char type; //r for relative, a for absolute
+        float dist; //mm
+        float time; //seconds
+    };
     //public functions
     public:
         //default constructor
@@ -43,11 +49,9 @@ class Axis {
         void loadConfig(JsonVariant config);
         //tick all motors
         void tick();
-        //move all motors to coordinate
-        void moveAbsolute(float pos, float time = 0);
 
-        //move all motors a set distance
-        void moveRelative(float dist, float time = 0);
+        //move the axis. specify type with 'r', or 'a'
+        void generalMove(Axis::move move);
 
         //wait for other axis to finish move
         void delay(float time);
@@ -103,12 +107,7 @@ class Axis {
 
     //internal state variables
     private:
-        //stores move action data
-        struct move {
-            char type; //r for relative, a for absolute
-            float dist; //mm
-            float time; //seconds
-        };
+
         //stores a stepper driver object allong with position data.
         struct Stepper {
             float prevActionTime; //the time from which to measure the interval

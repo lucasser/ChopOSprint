@@ -11,18 +11,18 @@ void level1pos(Axis* axis) {
     if (axis->levelSensor->detect()) {
         return;
     }
-    axis->moveRelative(10);
+    axis->generalMove({'r', 10, 0});
     axis->levelSensor->prep();
     while (!axis->levelSensor->detect()) {
-        axis->moveRelative(-1);
+        axis->generalMove({'r', -1, 0});
     }
     axis->stop();
     axis->levelSensor->stow();
     axis->zero();
-    axis->moveRelative(10);
+    axis->generalMove({'r', 10, 0});
     axis->levelSensor->prep();
     while (!axis->levelSensor->detect()) {
-        axis->moveRelative(-1, 0.5); //[TODO?]: adjust speed
+        axis->generalMove({'r', -1, 0.5}); //[TODO?]: adjust speed
     }
     axis->stop();
     axis->levelSensor->stow();
