@@ -7,7 +7,7 @@ This is the holding folder for configs that are not used at the moment. Use this
 
 JSON template:
 
-```
+```json
 {
     "axis": [
         {
@@ -46,15 +46,16 @@ JSON template:
 
 **Sensor**: the data for the leveling sensor
 supported sensors:
+
 - [x] CRTouch
 - [x] limit switch
 - [x] no sensor.
 
 see [sensors](/include/sensors.h) for sensor specific data
 
-
 sample config file:
-```
+
+```json
 {
     "axis": [
         {

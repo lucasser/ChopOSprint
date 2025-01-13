@@ -1,28 +1,35 @@
-RPI -> esp
+# Communication protocol
+
+## RPI -> esp
+
 Command list:
 Move (m)
-    Relative/absolute
-    {Axis, Pos}
-    time
+
+- Relative/absolute
+- {Axis, Pos}
+- time
 
 Level (l)
-    Axis
+
+- Axis
 
 Toolhead (t) [TODO] not gonna do yet
-    ?
+
+- ?
 
 Update settings (u)
-    Path to setting
-    Value
+
+- Path to setting
+- Value
 
 Stop (actually suspend) (s)
 
 Resume (r)
-    true/false
 
+- true/false
 
+## Esp -> rpi
 
-Esp -> rpi
 Move another axis
 Finished leveling
 Maybe some kind of response
