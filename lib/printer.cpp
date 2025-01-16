@@ -28,11 +28,16 @@ Axis* Printer::getAxis(char id) {
   return nullptr;
 }
 
-void Printer::strProccess(String in) {
+void Printer::processCommand(String in) {
   char command = in.charAt(0);
+  if (in.length() < 3) {
+    return;
+  }
   switch (command) {
     case 'l': //level
       Serial.println("level");
+      char id = in.charAt(2);
+      AXIS.at(AXISBYID).level();
       break;
     case 't': //tool
       Serial.println("tool");
@@ -40,32 +45,31 @@ void Printer::strProccess(String in) {
     case 'u': //update internal config
       Serial.println("config updated");
       break;
-    case 's': //level
+    case 's': //stop
       Serial.println("stopped");
+      int j = 0;
+      for (auto i : AXIS) {
+        if (!i.init) {
+          continue;
+        }
+        if (in.indexOf(axismap.find(j)->first) != -1 || in.indexOf('a') != -1) {
+          i.suspend();
+        }
+        j++;
+      }
       break;
     case 'r': //resume
       Serial.println("moving");
       break;
     case 'm': //move
-      moveCommand go = parse(in);
+      moveCommand go = parseMove(in);
+      int j = 0;
       for (auto i : AXIS) {
-        if (!i.init) {
+        if (!i.init || isnanf(go.coords.at(j))) {
           continue;
         }
-        float dist = go.coords[AXISBYID];
-        //call correct move function
-        if (!isnanf(dist)) { //make sure this coord was specified. if it wasn't it'll be NAN, then stay in place
-          switch (command) {
-            case 'a':
-              axis.moveAbsolute(dist, go.time);
-              break;
-            case 'r':
-              axis.moveRelative(dist, go.time);
-              break;
-          }
-        } else {
-          axis.delay(go.time);
-        }
+        i.generalMove({in.charAt(2), go.coords.at(j), go.time});
+        j++;
       }
     default:
       break;
@@ -74,7 +78,7 @@ void Printer::strProccess(String in) {
 
 //[TODO]: move to dedicated file REWRITE!!! currently wont parse more than one axis
 //problems arise if given just r10. Always send at least 1 coordinate
-moveCommand Printer::parse(String in) {
+moveCommand Printer::parseMove(String in) {
   float* coord = nullptr; //the coordinate in moveCommand::axis to write to
   moveCommand go; //where we moving next
   String temp = "";

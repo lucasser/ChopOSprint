@@ -75,6 +75,7 @@ void Axis::setupSensor(JsonVariant sensor) {
 }
 
 void Axis::tick() {
+    if (!init) {return;}
     for (ALLMOTORS) {
         if (micros() >= i.timeForNextAction + i.prevActionTime) {
             i.timeForNextAction = i.motor->nextAction();
@@ -89,6 +90,7 @@ void Axis::tick() {
 }
 
 void Axis::generalMove(move move) {
+    if (!init) {return;}
     if (suspended) {
         for (ALLMOTORS) {
             i.beginMove(move, this);

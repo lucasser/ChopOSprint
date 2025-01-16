@@ -27,9 +27,10 @@ class Printer {
         Axis* getAxis(int id);
 
         //processes the input string and figures out what to do
-        void strProccess(String in);
+        void processCommand(String in);
 
-        moveCommand Printer::parse(String in);
+        //converts input string for a move into a moveCommand
+        moveCommand parseMove(String in);
 
     private:
         const std::unordered_map<char, int> axismap = AXISORDER; //maps axis name to array index

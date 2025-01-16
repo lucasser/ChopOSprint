@@ -3,13 +3,15 @@
 ## RPI -> esp
 
 Command list:
-Move (m)
+Move
+legal: m a x10, m a t10 x10
 
 - Relative/absolute
 - {Axis, Pos}
 - time
 
 Level (l)
+only pass one axis and wait for response before continuing
 
 - Axis
 
