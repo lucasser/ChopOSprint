@@ -164,7 +164,13 @@ class Axis {
 
 //contains 4 coordinates for 4 axis, and time for the move. Absolute positions only
 struct moveCommand{
-    std::array<float, AXISAMOUNT> coords; //x, y, z, e. Add values for more axis
+    moveCommand() {
+        for (auto i : coords) {
+            i = NAN;
+        }
+    };
+
+    std::array<float, AXISAMOUNT> coords; //stores positions for a move. size configurable in config.h
     float time;
     String toString() {
         String out = "time: ";
