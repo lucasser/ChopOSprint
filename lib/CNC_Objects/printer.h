@@ -3,9 +3,15 @@
 
 //[TODO]: return error if config is invalid
 
-#include "../config/config.h"
-#include "ArduinoJson.h"
+#include "arduinoJsonChar.h"
 #include "unordered_map"
+#include <vector>
+#include "../../config/config.h"
+#include <axis.h>
+
+using std::vector;
+using std::unordered_map;
+using std::array;
 
 #define AXISBYID axismap.find(id)->second //lookup the correct axis by char id
 
@@ -38,9 +44,9 @@ class Printer {
         Axis* getAxis(int id);
 
         //[TODO?]: dynamically allocate a vector to store the axis. then any identifier will work.
-        const std::unordered_map<char, int> axismap = AXISORDER; //maps axis name to array index
-        std::array<Axis, AXISAMOUNT> AXIS = {}; //Stores all the axis controlled by the esp. Do not pass Axis by value, only by refference.
-        vector<char> activeAxis;
+        const unordered_map<char, int> axismap = AXISORDER; //maps axis name to array index
+        array<Axis, AXISAMOUNT> AXIS = {}; //Stores all the axis controlled by the esp. Do not pass Axis by value, only by refference.
+        vector<char> activeAxis = {};
 };
 
 #endif //PRINTER_H

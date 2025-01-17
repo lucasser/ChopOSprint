@@ -1,7 +1,4 @@
 #include "sensors.h"
-#include <Arduino.h>
-#include "ESP32Servo.h"
-#include "FunctionalInterrupt.h"
 
 CRTouch::CRTouch(int pwm, int signal): control(pwm), input(signal) {
   sensor.attach(control);

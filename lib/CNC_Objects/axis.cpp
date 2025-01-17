@@ -1,6 +1,22 @@
 #include "axis.h"
-#include <Arduino.h>
-#include "leveling.h"
+#include <leveling.h>
+#include <DRV8825.h>
+
+//custom converter to export ArduinoJson elements as char
+namespace ArduinoJson {
+  template <>
+  struct Converter<char> {
+    static void toJson(char c, JsonVariant var) {
+      char buf[] = {c, 0};
+      var.set(buf);
+    }
+
+    static char fromJson(JsonVariantConst src) {
+      auto p = src.as<const char*>();
+      return p ? p[0] : 0;
+    }
+  };
+}
 
 Axis::Axis() {}
 
@@ -22,17 +38,13 @@ void Axis::loadConfig(JsonVariant config) {
     offset = axis["0offset"];
     microstep = axis["microstep"];
     maxSpeed = axis["maxspeed"];
-    char level = axis["level"];
+    String level = axis["level"];
 
-    switch (level) {
-    case '2Local':
+    if (level == "2Local") {
         levelFunction = &level2posLocal;
-        break;
-    case '2Serial':
+    } else if (level == "2Serial") {
         levelFunction = &level2posSerial;
-        break;
-    case '1':
-    default:
+    } else {
         levelFunction = &level1pos;
     }
 
@@ -54,37 +66,28 @@ void Axis::setupMotor(JsonVariant stepper) {
     mot.MOTORSTEPS = stepper["stepsPerRev"];
     mot.direction = (stepper["direction"] == "rev") ? -1 : 1;
 
-    char driver = stepper["driver"];
-    switch (driver) {
-        case 'DRV8825':
-                if (stepper["pins"].size() == 2) {
-                    mot.motor = new DRV8825(mot.MOTORSTEPS, stepper["pins"][0], stepper["pins"][1]);
-                } else {
-                    mot.motor = new DRV8825(mot.MOTORSTEPS, stepper["pins"][0], stepper["pins"][1], stepper["pins"][2], stepper["pins"][3], stepper["pins"][4]);
-                }
-            break;
-        //[TODO]: Add more supported drivers
-        default:
-            return;
+    String driver = stepper["driver"];
+    if (driver == "DRV8825") {
+        if (stepper["pins"].size() == 2) {
+            mot.motor = new DRV8825(mot.MOTORSTEPS, stepper["pins"][0], stepper["pins"][1]);
+        } else {
+            mot.motor = new DRV8825(mot.MOTORSTEPS, stepper["pins"][0], stepper["pins"][1], stepper["pins"][2], stepper["pins"][3], stepper["pins"][4]);
+        }
     }
+    //[TODO]: Add more supported drivers
     mot.motor->setRPM(maxSpeed);
     mot.motor->setMicrostep(microstep);
     motors.push_back(mot);
 }
 
 void Axis::setupSensor(JsonVariant sensor) {
-    char sensorType = sensor["sensor"];
-    switch (sensorType) {
-        case 'crtouch':
-            levelSensor = new CRTouch(sensor["pwm"], sensor["signal"]);
-            break;
-        case 'noSensor':
-            levelSensor = new NoSensor();
-            break;
-        case 'limitSwitch':
-            levelSensor = new LimitSwitch(int(sensor["signal"]));
-            break;
-        default:
+    String sensorType = sensor["sensor"];
+    if (sensorType == "crtouch") {
+        levelSensor = new CRTouch(sensor["pwm"], sensor["signal"]);
+    } else if (sensorType == "noSensor") {
+        levelSensor = new NoSensor();
+    } else if (sensorType == "limitSwitch") {
+        levelSensor = new LimitSwitch(int(sensor["signal"]));
     }
 }
 
@@ -122,7 +125,7 @@ void Axis::level() {
     Serial.println("leveled :D");
 }
 
-void Axis::zero(int id = -1) {
+void Axis::zero(int id) {
     if (id == -1){
         for (ALLMOTORS) {
             i.curPos = offset;

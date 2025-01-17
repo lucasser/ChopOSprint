@@ -9,10 +9,8 @@ Update config [TODO] takes path to a key and a value, and sets that key to the s
 #ifndef CONFIG_H
 #define CONFIG_H
 
-#include <Arduino.h>
 #include "SPIFFS.h"
 #include "ArduinoJson.h"
-#include "axis.h"
 
 //load config document from config.json to JsonDocument doc
 void loadConfig(JsonDocument& doc) {
@@ -30,22 +28,6 @@ void loadConfig(JsonDocument& doc) {
     }
 
     configFile.close();
-}
-
-//custom converter to export ArduinoJson elements as char
-namespace ArduinoJson {
-  template <>
-  struct Converter<char> {
-    static void toJson(char c, JsonVariant var) {
-      char buf[] = {c, 0};
-      var.set(buf);
-    }
-
-    static char fromJson(JsonVariantConst src) {
-      auto p = src.as<const char*>();
-      return p ? p[0] : 0;
-    }
-  };
 }
 
 #endif

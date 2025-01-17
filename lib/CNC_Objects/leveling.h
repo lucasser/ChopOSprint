@@ -2,9 +2,7 @@
     Different leveling logic functions depending on the axis confuguration
 */
 
-#include "axis.h"
-#include "sensor.h"
-#include <Arduino.h>
+#include <axis.h>
 
 //level axis that has one probing location/no sensor
 //"1" in config

@@ -1,5 +1,4 @@
 #include "printer.h"
-#include "axis.h"
 
 void Printer::loadConfig(JsonDocument& config) {
   setupAxis(config);
@@ -34,46 +33,38 @@ void Printer::processCommand(String& in) {
   if (in.length() < 3) {
     return;
   }
-  switch (command) {
-    case 'l': //level
-      Serial.println("level");
-      getAxis(in.charAt(2))->level();
-      break;
-    case 't': //tool
-      Serial.println("tool");
-      break;
-    case 'u': //update internal config
-      Serial.println("config updated");
-      break;
-    case 's': //stop
-      Serial.println("stopped");
-      int j = 0;
-      for (auto i : AXIS) {
-        if (!i.init) {
-          continue;
-        }
-        if (in.indexOf(axismap.find(j)->first) != -1 || in.indexOf('a') != -1) {
-          i.suspend();
-        }
-        j++;
+  if (command == 'l') {
+    Serial.println("level");
+    getAxis(in.charAt(2))->level();
+  } else if (command == 't') {
+    Serial.println("tool");
+  } else if (command == 'u') {
+    Serial.println("config updated");
+  } else if (command == 's') {
+    Serial.println("stopped");
+    int j = 0;
+    for (auto i : AXIS) {
+      if (!i.init) {
+        continue;
       }
-      break;
-    case 'r': //resume
-      Serial.println("moving");
-      break;
-    case 'm': //move
-      moveCommand go = parseMove(in);
-      Serial.println(go.toString());
-      for (auto i : activeAxis) {
-        int id = i;
-        if (isnanf(go.coords.at(AXISBYID))) {
-          getAxis(i)->delay(go.time);
-        } else {
-          getAxis(i)->generalMove({go.type, go.coords.at(AXISBYID), go.time});
-        }
+      if (in.indexOf(axismap.find(j)->first) != -1 || in.indexOf('a') != -1) {
+        i.suspend();
       }
-    default:
-      break;
+      j++;
+    }
+  } else if (command == 'r') {
+    Serial.println("moving");
+  } else if (command == 'm') {
+    moveCommand go = parseMove(in);
+    Serial.println(go.toString());
+    for (auto i : activeAxis) {
+      int id = i;
+      if (isnanf(go.coords.at(AXISBYID))) {
+        getAxis(i)->delay(go.time);
+      } else {
+        getAxis(i)->generalMove({go.type, go.coords.at(AXISBYID), go.time});
+      }
+    }
   }
 }
 

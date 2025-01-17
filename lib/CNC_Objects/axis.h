@@ -9,15 +9,15 @@ Header file for everything to do with stepper motors:
 #ifndef Axis_H
 #define Axis_H
 
-#include "DRV8825.h"
-#include <LinkedList.h>
+#include <BasicStepperDriver.h>
 #include <queue>
-#include "ArduinoJson.h"
-#include <sensors.h>
+#include "arduinoJsonChar.h"
 #include <vector>
-#include <../config/config.h>
+#include <sensors.h>
+#include "../../config/config.h"
 
 using std::vector;
+using std::queue;
 
 #define ALLMOTORS auto i : motors //macro for iterating through all the motor instances in Axis motors vector. Use i to access each instance
 
@@ -154,7 +154,7 @@ class Axis {
         //list of motors
         vector<Stepper> motors;
 
-        std::queue<move> moveCommands; //queue of move commands to execute
+        queue<move> moveCommands; //queue of move commands to execute
         move currentMove; //the move currently being executed
 
         //Suspend data//

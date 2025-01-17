@@ -21,6 +21,7 @@
 */
 
 #include <ESP32Servo.h>
+#include <FunctionalInterrupt.h>
 
 #ifndef Sensors_H
 #define Sensors_H
