@@ -18,6 +18,7 @@ JSON template:
                 "steplen": ,
                 "microstep": ,
                 "maxspeed": ,
+                "level":
             },
             "motors": [{
                 "driver": ,
@@ -38,6 +39,7 @@ JSON template:
 - **Steplen**: how many steps it takes to move a millimeter based on your axis drive method
 - **Microstep**: The microstep resolution in use
 - **maxspeed**: Maximum speed of the axis. Used if a time for a move is not given.
+- **Level**: The leveling function to use. See [level.h](/include/leveling.h)
 - **Motors**: an array of stepper motors that drive the axis. Can be any length
 - **Driver**: The type of motor driver in use
   - [x] DRV8825

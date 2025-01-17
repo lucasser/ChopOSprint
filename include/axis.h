@@ -147,6 +147,8 @@ class Axis {
         //keep track of dynamic axis state//
         int microstep = 1; //the microstepping situation
 
+        void (*levelFunction)(Axis*);
+
         //used in tick function to start moves correctly
         long moveTime = 0; //how long to wait for next move
         float startTime; //when move started

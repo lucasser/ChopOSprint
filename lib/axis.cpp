@@ -16,12 +16,25 @@ Axis::~Axis() {
 void Axis::loadConfig(JsonVariant config) {
     //axis
     id = config["id"];
-    JsonObject axis = config["axis"];
+    JsonObject  axis = config["axis"];
     maxPos = axis["maxpos"];
     stepLen = axis["steplen"];
     offset = axis["0offset"];
     microstep = axis["microstep"];
     maxSpeed = axis["maxspeed"];
+    char level = axis["level"];
+
+    switch (level) {
+    case '2Local':
+        levelFunction = &level2posLocal;
+        break;
+    case '2Serial':
+        levelFunction = &level2posSerial;
+        break;
+    case '1':
+    default:
+        levelFunction = &level1pos;
+    }
 
     //motors
     JsonArray motors = config["motors"];
@@ -105,10 +118,8 @@ void Axis::delay(float time) {
 }
 
 void Axis::level() {
-    /*
-        correct level function
-        tell RPI im done?
-    */
+    (*levelFunction)(this);
+    Serial.println("leveled :D");
 }
 
 void Axis::zero(int id = -1) {
