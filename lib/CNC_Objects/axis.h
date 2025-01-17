@@ -10,20 +10,18 @@ Header file for everything to do with stepper motors:
 #define Axis_H
 
 #include "DRV8825.h"
-#include "LinkedList.h"
+#include <LinkedList.h>
 #include <queue>
 #include "ArduinoJson.h"
-#include "sensors.h"
+#include <sensors.h>
 #include <vector>
-#include "../config/config.h"
+#include <../config/config.h>
 
 using std::vector;
 
 #define ALLMOTORS auto i : motors //macro for iterating through all the motor instances in Axis motors vector. Use i to access each instance
 
 /*[TODO]:
-    emergency shutdown
-    level offset
     detailed comments on all functions (see any cpp func for reference)
 */
 class Axis {

@@ -3,10 +3,10 @@ Main code for printer
 */
 
 #include <Arduino.h>
-#include "axis.h"
+#include <axis.h>
 #include <unordered_map>
-#include "config.h"
-#include "printer.h"
+#include <config.h>
+#include <printer.h>
 
 Printer printer;
 

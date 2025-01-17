@@ -39,7 +39,7 @@ JSON template:
 - **Steplen**: how many steps it takes to move a millimeter based on your axis drive method
 - **Microstep**: The microstep resolution in use
 - **maxspeed**: Maximum speed of the axis. Used if a time for a move is not given.
-- **Level**: The leveling function to use. See [level.h](/include/leveling.h)
+- **Level**: The leveling function to use. See [level.h](/lib/CNC_Objects/leveling.h)
 - **Motors**: an array of stepper motors that drive the axis. Can be any length
 - **Driver**: The type of motor driver in use
   - [x] DRV8825
@@ -51,7 +51,7 @@ JSON template:
   - [x] limit switch
   - [x] no sensor.
 
-See [sensors](/include/sensors.h) for sensor specific data
+See [sensors](/lib/CNC_Objects/sensors.h) for sensor specific data
 
 Sample config file:
 
