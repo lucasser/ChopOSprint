@@ -100,6 +100,8 @@ class Axis {
 
     //public variables
     public:
+        //axis id
+        char id;
         //is the axis configured
         bool init = false;
         //pointer to sensor
@@ -169,9 +171,9 @@ struct moveCommand{
             i = NAN;
         }
     };
-
+    char type; //relative or absolute
     std::array<float, AXISAMOUNT> coords; //stores positions for a move. size configurable in config.h
-    float time;
+    float time = 0;
     String toString() {
         String out = "time: ";
         out += time;

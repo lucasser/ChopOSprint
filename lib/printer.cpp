@@ -10,6 +10,7 @@ void Printer::setupAxis(JsonVariant config) {
   for (JsonVariant i : axis) {
     char id = i["id"];
     AXIS.at(AXISBYID).loadConfig(i);
+    activeAxis.push_back(id);
   }
   //[TODO]: setup heating stuff
 }
@@ -28,7 +29,7 @@ Axis* Printer::getAxis(char id) {
   return nullptr;
 }
 
-void Printer::processCommand(String in) {
+void Printer::processCommand(String& in) {
   char command = in.charAt(0);
   if (in.length() < 3) {
     return;
@@ -36,8 +37,7 @@ void Printer::processCommand(String in) {
   switch (command) {
     case 'l': //level
       Serial.println("level");
-      char id = in.charAt(2);
-      AXIS.at(AXISBYID).level();
+      getAxis(in.charAt(2))->level();
       break;
     case 't': //tool
       Serial.println("tool");
@@ -63,40 +63,35 @@ void Printer::processCommand(String in) {
       break;
     case 'm': //move
       moveCommand go = parseMove(in);
-      int j = 0;
-      for (auto i : AXIS) {
-        if (!i.init || isnanf(go.coords.at(j))) {
-          continue;
+      for (auto i : activeAxis) {
+        int id = i;
+        if (isnanf(go.coords.at(AXISBYID))) {
+          getAxis(i)->delay(go.time);
+        } else {
+          getAxis(i)->generalMove({go.type, go.coords.at(AXISBYID), go.time});
         }
-        i.generalMove({in.charAt(2), go.coords.at(j), go.time});
-        j++;
       }
     default:
       break;
   }
 }
 
-//[TODO]: move to dedicated file REWRITE!!! currently wont parse more than one axis
-//problems arise if given just r10. Always send at least 1 coordinate
-moveCommand Printer::parseMove(String in) {
-  float* coord = nullptr; //the coordinate in moveCommand::axis to write to
+//[TODO?]: revisit and optimize logic
+moveCommand Printer::parseMove(String& in) {
   moveCommand go; //where we moving next
   String temp = "";
 
-  go.time = in.substring(1, in.indexOf(' ')).toFloat();
+  go.type = in.charAt(2);
+  go.time = in.substring(in.indexOf('t'), in.indexOf(' ', in.indexOf('t'))).toFloat();
 
-  for (int i = in.indexOf(' '); i < in.length(); i++) {
-    char c = in.charAt(i);
-    if (c == ' ') { //new value
-      if (coord != nullptr) {*coord = temp.toFloat(); /*record position*/}
-      temp = "";
-      coord = &go.coords[axismap.find(in.charAt(i+1))->second];
-      i++; //skip over identifier letter
-    } else {
-      temp += c;
+  for (auto i : activeAxis) {
+    int index = in.indexOf(i);
+    if (index != -1) {
+      temp = in.substring(index + 1, in.indexOf(' ', index));
     }
+    int id = i;
+    go.coords.at(AXISBYID) = temp.toFloat();
   }
-  *coord = temp.toFloat();
 
   Serial.println(go.toString());
   return go;

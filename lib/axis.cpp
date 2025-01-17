@@ -15,6 +15,7 @@ Axis::~Axis() {
 
 void Axis::loadConfig(JsonVariant config) {
     //axis
+    id = config["id"];
     JsonObject axis = config["axis"];
     maxPos = axis["maxpos"];
     stepLen = axis["steplen"];
