@@ -6,7 +6,7 @@
                 "maxpos": 400,
                 "0offset": 0,
                 "steplen": 0.2,
-                "microstep": 32,
+                "microstep": 1,
                 "maxspeed": 240
             },
             "motors": [{
