@@ -33,6 +33,7 @@ class Printer {
         moveCommand parseMove(String& in);
 
     private:
+        //[TODO?]: dynamically allocate a vector to store the axis. then any identifier will work.
         const std::unordered_map<char, int> axismap = AXISORDER; //maps axis name to array index
         std::array<Axis, AXISAMOUNT> AXIS = {}; //Stores all the axis controlled by the esp. Do not pass Axis by value, only by refference.
         vector<char> activeAxis;

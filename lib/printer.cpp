@@ -63,6 +63,7 @@ void Printer::processCommand(String& in) {
       break;
     case 'm': //move
       moveCommand go = parseMove(in);
+      Serial.println(go.toString());
       for (auto i : activeAxis) {
         int id = i;
         if (isnanf(go.coords.at(AXISBYID))) {

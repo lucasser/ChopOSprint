@@ -12,11 +12,17 @@ JSON template:
     "axis": [
         {
             "id": ,
+            "axis": {
+                "maxpos": ,
+                "0offset": ,
+                "steplen": ,
+                "microstep": ,
+                "maxspeed": ,
+            },
             "motors": [{
-                "pins":,
-                "direction":,
-                "maxpos":,
-                "steplen":,
+                "driver": ,
+                "pins": ,
+                "direction": ,
                 "stepsPerRev":
             }],
             "sensor": {sensor specific info}
@@ -25,60 +31,49 @@ JSON template:
 }
 ```
 
-**Axis**: an array of axis for the esp to control. Can be any length, as long as the esp has the pins
+- **Axis**: an array of axis for the esp to control. Can be any length, as long as the esp has the pins
+- **ID**: the axis id. Can be any char as long as it is in [config.h](config.h), and the amount is saved to AXISAMOUNT
+- **Maxpos**: the maximum position the axis can be at.
+- **0offset**: difference in millimeters between sensor 0 position and axis 0 position. Can be changed during use through command (not yet implemented)
+- **Steplen**: how many steps it takes to move a millimeter based on your axis drive method
+- **Microstep**: The microstep resolution in use
+- **maxspeed**: Maximum speed of the axis. Used if a time for a move is not given.
+- **Motors**: an array of stepper motors that drive the axis. Can be any length
+- **Driver**: The type of motor driver in use
+  - [x] DRV8825
+  - **Pins**: array of 2 pins that connect to the motor driver [direction, step] or array of 5 pins [direction, step, microstep1, microstep2, microstep3]
+- **Direction**: which direction the motor considers forward. Can be fwd or rev. Fwd is counterclockwise
+- **StepsPerRev**: how many steps the motor needs to complete a revolution
+- **Sensor**: the data for the leveling sensor. Supported sensors:
+  - [x] CRTouch
+  - [x] limit switch
+  - [x] no sensor.
 
-**ID**: the axis id. current support for x, y, z, e. modify movecommand::coords in
-[axis.h](/include/axis.h) and main::axismap and main::AXIS in [main.cpp](/src/main.cpp) to add more
+See [sensors](/include/sensors.h) for sensor specific data
 
-**Motors**: an array of stepper motors that drive the axis. Can be any length
-
-**Pins**: array of 2 pin that connect to the motor driver [direction, step]
-
-**Direction**: which direction the motor considers forward. Can be fwd or rev. Fwd is counterclockwise
-
-**Maxpos**: the maximum position the axis can be at.
-
-**Steplen**: how many steps it takes to move a millimeter based on your axis control method
-
-**StepsPerRev**: how many steps the motor needs to complete a revolution
-
-**0offset**: difference in millimeters between sensor 0 position and axis 0 position. Can be changed during use through command (not yet implemented)
-
-**Sensor**: the data for the leveling sensor
-supported sensors:
-
-- [x] CRTouch
-- [x] limit switch
-- [x] no sensor.
-
-see [sensors](/include/sensors.h) for sensor specific data
-
-sample config file:
+Sample config file:
 
 ```json
 {
     "axis": [
         {
-            "id":"z",
+            "id":"x",
+            "axis": {
+                "maxpos": 400,
+                "0offset": 0,
+                "steplen": 0.2,
+                "microstep": 1,
+                "maxspeed": 240
+            },
             "motors": [{
+                "driver": "DRV8825",
                 "pins": [2,15],
                 "direction": "fwd",
-                "maxpos": 400,
-                "steplen": 0.2,
-                "stepsPerRev": 200,
-                "0offset": 0
-            }, {
-                "pins": [4,13],
-                "direction": "rev",
-                "maxpos": 400,
-                "steplen": 0.2,
-                "stepsPerRev": 200,
-                "0offset": 0
+                "stepsPerRev": 200
             }],
             "sensor": {
-                "type": "crtouch",
-                "pwm": 15,
-                "signal": 12
+                "type": "limitSwitch",
+                "input": 12
             }
         }
     ]
