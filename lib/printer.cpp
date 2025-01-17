@@ -1,7 +1,7 @@
 #include "printer.h"
 #include "axis.h"
 
-Printer::Printer(JsonDocument& config) {
+void Printer::loadConfig(JsonDocument& config) {
   setupAxis(config);
 }
 

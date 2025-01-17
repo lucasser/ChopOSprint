@@ -11,8 +11,19 @@
 
 class Printer {
     public:
-        Printer(JsonDocument& config);
+        //configure the printer
+        void loadConfig(JsonDocument& config);
+
+        //processes the input string and figures out what to do
+        void processCommand(String& in);
+
+    private:
+        //configures all the axis
         void setupAxis(JsonVariant config);
+
+        //converts input string for a move into a moveCommand
+        moveCommand parseMove(String& in);
+
         /**
          * @brief Request a pointer to a specific axis from %Printer::AXIS.
          * @param id Char (x,y,z,e) specifying which axis to return.
@@ -26,13 +37,6 @@ class Printer {
         **/
         Axis* getAxis(int id);
 
-        //processes the input string and figures out what to do
-        void processCommand(String& in);
-
-        //converts input string for a move into a moveCommand
-        moveCommand parseMove(String& in);
-
-    private:
         //[TODO?]: dynamically allocate a vector to store the axis. then any identifier will work.
         const std::unordered_map<char, int> axismap = AXISORDER; //maps axis name to array index
         std::array<Axis, AXISAMOUNT> AXIS = {}; //Stores all the axis controlled by the esp. Do not pass Axis by value, only by refference.

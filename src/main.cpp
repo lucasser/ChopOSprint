@@ -8,6 +8,8 @@ Main code for printer
 #include "config.h"
 #include "printer.h"
 
+Printer printer;
+
 void setup() {
   //load config document from SPIFFS
   JsonDocument config;
@@ -18,15 +20,15 @@ void setup() {
   Serial.setTimeout(1);
 
   //register appropriate axis
-  Printer printer(config);
+  printer.loadConfig(config);
   Serial.println("on");
 }
 
 void loop() {
   while (Serial.available()) {
     String in = Serial.readString();
-    //Serial.println(in);
-    //strProccess(in);
+    Serial.println(in);
+    printer.processCommand(in);
   }
 
   //axis.tick();
