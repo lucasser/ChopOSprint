@@ -65,7 +65,22 @@ void Printer::processCommand(String& in) {
         getAxis(i)->generalMove({go.type, go.coords.at(AXISBYID), go.time});
       }
     }
+  } else if (command == 'p') {
+    Serial.println(toString());
   }
+}
+
+String Printer::toString() {
+  String out = "axis: [{";
+  for (auto i : activeAxis) {
+    out += "\nid: ";
+    out += i;
+    out += "\naxis: ";
+    char id = i;
+    out += AXIS.at(AXISBYID).toString();
+  }
+  out += "}]";
+  return out;
 }
 
 //[TODO?]: revisit and optimize logic

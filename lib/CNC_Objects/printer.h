@@ -23,6 +23,9 @@ class Printer {
         //processes the input string and figures out what to do
         void processCommand(String& in);
 
+        //prints out the structure of the printer
+        String toString();
+
     private:
         //configures all the axis
         void setupAxis(JsonVariant config);

@@ -79,6 +79,9 @@ class Axis {
         /// @param trash if true, trashes move queue, if false, movement is resumed from where the stop was called.
         void resume(bool trash);
 
+        //prints out info about the axis
+        String toString();
+
     //helper functions
     private:
         //begins next move
@@ -133,6 +136,17 @@ class Axis {
                 timeForNextAction = 0;
                 stepsDone = 0;
             };
+
+            //prints out all motor data
+            String toString() {
+                String out = "{\n\tdirection: ";
+                out += direction;
+                out += "\n\tstepsPerRev: ";
+                out += MOTORSTEPS;
+                out += "\n}";
+                return out;
+            };
+
             BasicStepperDriver* motor;
         };
 

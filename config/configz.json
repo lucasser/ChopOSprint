@@ -1,31 +1,29 @@
 {
-    "axis": [
-        {
-            "id":"z",
-            "axis": {
-                "maxpos": 400,
-                "0offset": 0,
-                "steplen": 0.2,
-                "microstep": 1,
-                "maxspeed": 240,
-                "level": "2serial"
-            },
-            "motors": [{
-                "driver": "DRV8825",
-                "pins": [2,15],
-                "direction": "fwd",
-                "stepsPerRev": 200
-            }, {
-                "driver": "DRV8825",
-                "pins": [4,13],
-                "direction": "rev",
-                "stepsPerRev": 200
-            }],
-            "sensor": {
-                "type": "crtouch",
-                "pwm": 15,
-                "signal": 12
-            }
+    "axis": [{
+        "id":"z",
+        "axis": {
+            "maxpos": 400,
+            "0offset": 0,
+            "steplen": 0.2,
+            "microstep": 1,
+            "maxspeed": 240,
+            "level": "2serial"
+        },
+        "motors": [{
+            "driver": "DRV8825",
+            "pins": [2,15],
+            "direction": "fwd",
+            "stepsPerRev": 200
+        }, {
+            "driver": "DRV8825",
+            "pins": [4,13],
+            "direction": "rev",
+            "stepsPerRev": 200
+        }],
+        "sensor": {
+            "type": "crtouch",
+            "pwm": 15,
+            "signal": 12
         }
-    ]
+    }]
 }

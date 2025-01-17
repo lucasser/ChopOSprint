@@ -167,6 +167,28 @@ void Axis::resume(bool restart) {
     }
 }
 
+String Axis::toString() {
+    String out = "{\n\tmaxpos:";
+    out += maxPos;
+    out += "\n\t0offset: ";
+    out += offset;
+    out += "\n\tsteplen: ";
+    out += stepLen;
+    out += "\n\tmicrostep: ";
+    out += microstep;
+    out += "\n\tmaxspeed: ";
+    out += maxSpeed;
+    out += "\n}\nmotors: [";
+    for (auto i : motors) {
+        out += i.toString();
+        out += ", ";
+    }
+    out += "]\nsensor: ";
+    out += levelSensor->toString();
+    out += "}";
+    return out;
+}
+
 void Axis::startNextMove() {
     currentMove = moveCommands.front();
     moveCommands.pop();

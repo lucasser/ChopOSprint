@@ -20,8 +20,22 @@ void CRTouch::stow() {
   detachInterrupt(digitalPinToInterrupt(input));
 }
 
+String CRTouch::toString() {
+  String out = "{\n\ttype: crtouch\n\tpwm: ";
+  out += control;
+  out += "\n\tsignal: ";
+  out += input;
+  out += "\n}";
+  return out;
+}
+
 NoSensor::NoSensor() {
   detected = true;
+}
+
+String NoSensor::toString() {
+  String out = "{\n\ttype: nosensor\n}";
+  return out;
 }
 
 LimitSwitch::LimitSwitch(int signal): input(signal) {}
@@ -33,4 +47,11 @@ void LimitSwitch::prep() {
 void LimitSwitch::stow() {
   detected = false;
   detachInterrupt(digitalPinToInterrupt(input));
+}
+
+String LimitSwitch::toString() {
+  String out = "{\n\ttype: limitSwitch\n\tinput: ";
+  out += input;
+  out += "\n}";
+  return out;
 }

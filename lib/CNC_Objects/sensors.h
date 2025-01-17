@@ -32,6 +32,7 @@ class Sensor {
         Sensor() {}; //default constructor
         virtual void prep() = 0; //run before starting to level
         virtual void stow() = 0; //run after leveling
+        virtual String toString() = 0;
         bool detect() {return detected;}; //general check if sensor is triggered
         void IRAM_ATTR sensorIsr() {detected = true;}; //interrupt function for the sensor
     protected:
@@ -44,6 +45,7 @@ class CRTouch : public Sensor {
         CRTouch(int pwm, int signal);
         void prep(); //registers interrupt, ejects probe
         void stow(); //removes interrupt, stows probe
+        String toString(); //print out sensor data
 
     private:
         Servo sensor; //servo object for sensor control
@@ -58,6 +60,7 @@ class NoSensor : public Sensor {
         NoSensor();
         void prep() {return;} //not needed
         void stow() {return;} //not needed
+        String toString(); //print out sensor data
 };
 
 //a simple limit switch.
@@ -66,6 +69,7 @@ class LimitSwitch : public Sensor {
         LimitSwitch(int signal);
         void prep(); //register interrupt
         void stow(); //remove interrupt
+        String toString(); //print out sensor data
     private:
         int input; //the input pin
 };
