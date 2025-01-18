@@ -191,6 +191,8 @@ struct moveCommand{
     String toString() {
         String out = "time: ";
         out += time;
+        out += ", type: ";
+        out += type;
         out += ", coords: ";
         for (float x : coords) {
             out += x;

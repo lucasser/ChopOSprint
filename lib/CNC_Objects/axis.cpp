@@ -65,13 +65,13 @@ void Axis::setupMotor(JsonVariant stepper) {
 }
 
 void Axis::setupSensor(JsonVariant sensor) {
-    String sensorType = sensor["sensor"];
+    String sensorType = sensor["type"];
     if (sensorType == "crtouch") {
         levelSensor = new CRTouch(sensor["pwm"], sensor["signal"]);
     } else if (sensorType == "noSensor") {
         levelSensor = new NoSensor();
     } else if (sensorType == "limitSwitch") {
-        levelSensor = new LimitSwitch(int(sensor["signal"]));
+        levelSensor = new LimitSwitch(int(sensor["input"]));
     }
 }
 
@@ -168,7 +168,7 @@ void Axis::resume(bool restart) {
 }
 
 String Axis::toString() {
-    String out = "{\n\tmaxpos:";
+    String out = "{\n\tmaxpos: ";
     out += maxPos;
     out += "\n\t0offset: ";
     out += offset;
@@ -179,9 +179,8 @@ String Axis::toString() {
     out += "\n\tmaxspeed: ";
     out += maxSpeed;
     out += "\n}\nmotors: [";
-    for (auto i : motors) {
+    for (ALLMOTORS) {
         out += i.toString();
-        out += ", ";
     }
     out += "]\nsensor: ";
     out += levelSensor->toString();

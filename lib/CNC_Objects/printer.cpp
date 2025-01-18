@@ -89,7 +89,7 @@ moveCommand Printer::parseMove(String& in) {
   String temp = "";
 
   go.type = in.charAt(2);
-  go.time = in.substring(in.indexOf('t'), in.indexOf(' ', in.indexOf('t'))).toFloat();
+  go.time = in.substring(in.indexOf('t') + 1, in.indexOf(' ', in.indexOf('t'))).toFloat();
 
   for (auto i : activeAxis) {
     int index = in.indexOf(i);

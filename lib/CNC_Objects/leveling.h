@@ -1,5 +1,6 @@
 /*
     Different leveling logic functions depending on the axis confuguration
+    If calling a level function
 */
 
 #include <axis.h>
@@ -13,17 +14,15 @@ void level1pos(Axis* axis) {
     }
     axis->generalMove({'r', 10, 0});
     axis->levelSensor->prep();
-    while (!axis->levelSensor->detect()) {
-        axis->generalMove({'r', -1, 0});
-    }
+    axis->generalMove({'r', -1000, 0});
+    while (!axis->levelSensor->detect()) {}
     axis->stop();
     axis->levelSensor->stow();
     axis->zero();
     axis->generalMove({'r', 10, 0});
     axis->levelSensor->prep();
-    while (!axis->levelSensor->detect()) {
-        axis->generalMove({'r', -1, 0.5}); //[TODO?]: adjust speed
-    }
+    axis->generalMove({'r', -1000, 500}); //[TODO?]: adjust speed
+    while (!axis->levelSensor->detect()) {}
     axis->stop();
     axis->levelSensor->stow();
     axis->zero();
