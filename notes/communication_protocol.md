@@ -26,9 +26,12 @@ Update settings (u)
 
 Stop (actually suspend) (s)
 
+- axis id, a for all
+
 Resume (r)
 
-- true/false
+- keep/trash move queue (k,t)
+- axis id, a for all
 
 ## Esp -> rpi
 

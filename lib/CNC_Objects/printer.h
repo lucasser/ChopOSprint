@@ -26,6 +26,9 @@ class Printer {
         //prints out the structure of the printer
         String toString();
 
+        //tick function for all axis and tools
+        void tick();
+
     private:
         //configures all the axis
         void setupAxis(JsonVariant config);

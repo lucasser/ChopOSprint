@@ -21,6 +21,12 @@ Axis* Printer::getAxis(int id) {
   return nullptr;
 }
 
+void Printer::tick() {
+  for (auto i : activeAxis) {
+    getAxis(i)->tick();
+  }
+}
+
 Axis* Printer::getAxis(char id) {
   if (AXIS.at(AXISBYID).init) {
     return &AXIS.at(AXISBYID);
@@ -33,30 +39,34 @@ void Printer::processCommand(String& in) {
   if (in.length() < 3) {
     return;
   }
-  if (command == 'l') {
+  if (command == 'l') { //Level
     Serial.println("level");
     getAxis(in.charAt(2))->level();
-  } else if (command == 't') {
+  } else if (command == 't') { //Toolhead
     Serial.println("tool");
-  } else if (command == 'u') {
+  } else if (command == 'u') { //Configs
     Serial.println("config updated");
-  } else if (command == 's') {
+  } else if (command == 's') { //Stop
     Serial.println("stopped");
-    int j = 0;
-    for (auto i : AXIS) {
-      if (!i.init) {
-        continue;
+    for (auto i : activeAxis) {
+      if (in.indexOf(i) != -1 || in.indexOf('a') != -1) {
+        getAxis(i)->suspend();
       }
-      if (in.indexOf(axismap.find(j)->first) != -1 || in.indexOf('a') != -1) {
-        i.suspend();
-      }
-      j++;
     }
-  } else if (command == 'r') {
+  } else if (command == 'r') { //Resume
+    bool trash = in.charAt(1) != 'k';
     Serial.println("moving");
-  } else if (command == 'm') {
+    for (auto i : activeAxis) {
+      if (in.indexOf(i) != -1 || in.indexOf('a') != -1) {
+        getAxis(i)->resume(trash);
+      }
+    }
+  } else if (command == 'm') { //Move
     moveCommand go = parseMove(in);
     Serial.println(go.toString());
+    if (go.type != 'r' && go.type != 'a') {
+      return;
+    }
     for (auto i : activeAxis) {
       int id = i;
       if (isnanf(go.coords.at(AXISBYID))) {
@@ -65,7 +75,7 @@ void Printer::processCommand(String& in) {
         getAxis(i)->generalMove({go.type, go.coords.at(AXISBYID), go.time});
       }
     }
-  } else if (command == 'p') {
+  } else if (command == 'p') { //Print
     Serial.println(toString());
   }
 }
@@ -76,8 +86,7 @@ String Printer::toString() {
     out += "\nid: ";
     out += i;
     out += "\naxis: ";
-    char id = i;
-    out += AXIS.at(AXISBYID).toString();
+    out += getAxis(i)->toString();
   }
   out += "}]";
   return out;
@@ -88,8 +97,8 @@ moveCommand Printer::parseMove(String& in) {
   moveCommand go; //where we moving next
   String temp = "";
 
-  go.type = in.charAt(2);
-  go.time = in.substring(in.indexOf('t') + 1, in.indexOf(' ', in.indexOf('t'))).toFloat();
+  go.type = in.charAt(1);
+  go.time = (in.indexOf("t") == -1) ? 0 : in.substring(in.indexOf('t') + 1, in.indexOf(' ', in.indexOf('t'))).toFloat();
 
   for (auto i : activeAxis) {
     int index = in.indexOf(i);
@@ -99,7 +108,5 @@ moveCommand Printer::parseMove(String& in) {
     int id = i;
     go.coords.at(AXISBYID) = temp.toFloat();
   }
-
-  Serial.println(go.toString());
   return go;
 }

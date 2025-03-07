@@ -3,7 +3,7 @@ ALL UNITS IN MM!!!
 Header file for everything to do with stepper motors:
     Axis class for controlling multiple steppers together
     supporting struct to pass coordinates for next move
-
+    [TODO]: move from mm to mm*10^5 to get rid of float
 */
 
 #ifndef Axis_H
@@ -19,7 +19,7 @@ Header file for everything to do with stepper motors:
 using std::vector;
 using std::queue;
 
-#define ALLMOTORS auto i : motors //macro for iterating through all the motor instances in Axis motors vector. Use i to access each instance
+#define ALLMOTORS auto& i : motors //macro for iterating through all the motor instances in Axis motors vector. Use i to access each instance
 
 /*[TODO]:
     detailed comments on all functions (see any cpp func for reference)
@@ -30,6 +30,16 @@ class Axis {
         char type; //r for relative, a for absolute
         float dist; //mm
         float time; //seconds
+        String toString() {
+            String out = "{\n\ttype: ";
+            out += type;
+            out += "\n\tdist: ";
+            out += dist;
+            out += "\n\ttime: ";
+            out += time;
+            out += "\n}";
+            return out;
+        }
     };
     //public functions
     public:
@@ -88,16 +98,20 @@ class Axis {
         void startNextMove();
         //convert millimeter input into motor steps
         int mmToSteps(float mm) {
-            return mm/stepLen*microstep;
+            return mm/stepLen;
         }
         //convert motor step amount input into mm distance
         float stepsToMM(int steps) {
-            return steps/microstep*stepLen;
+            return steps*stepLen;
         }
         //register motor using json object
         void setupMotor(JsonVariant stepper);
         //add correct sensor type for leveling
         void setupSensor(JsonVariant sensor);
+
+        //print functions
+        String printState();
+        String printMoves();
 
     //public variables
     public:
@@ -110,39 +124,47 @@ class Axis {
 
     //internal state variables
     private:
-
         //stores a stepper driver object allong with position data.
         struct Stepper {
-            float prevActionTime; //the time from which to measure the interval
-            float stepsDone = 0; //used to calculate curPos
-            float timeForNextAction; //when to take the next action to not use up CPU unessasaralily
-            float curPos; //location of motor
+            long prevActionTime; //the time from which to measure the interval
+            signed long stepsDone = 0; //used to calculate curPos
+            long timeForNextAction; //when to take the next action to not use up CPU unessasaralily
+            long stepCount = 0;
+            signed short dir = 1; //direction of move
+            double curPos = 0.0; //location of motor
+
+            //Assigned on init
             int MOTORSTEPS = 200; //steps per revolution
             int direction = 1; //1 for forward, -1 for reverse
 
             //correctly register the move (absolute or relative)
             void beginMove(Axis::move move, Axis* axis) {
-                switch (move.type) {
-                case 'r':
-                    motor->startMove(direction*axis->mmToSteps(move.dist), move.time*1000000L);
-                    break;
-                case 'a':
-                    motor->startMove(direction*(axis->mmToSteps(move.dist) - curPos), move.time*1000000L);
-                    break;
-                default:
-                    return;
+                float dist;
+                if (move.type == 'r') {
+                    dist = axis->mmToSteps(move.dist);
+                } else if (move.type == 'a') {
+                    dist = axis->mmToSteps(move.dist - curPos);
                 }
+                motor->startMove(direction*dist, move.time*1000000L);
+                Serial.println("registered move: " + String(dist));
                 prevActionTime = micros();
                 timeForNextAction = 0;
                 stepsDone = 0;
+                dir = (dist > 0) ? 1 : -1;
             };
 
             //prints out all motor data
             String toString() {
+                char pos[10];
+                dtostrf(curPos, 3, 6, pos);
                 String out = "{\n\tdirection: ";
                 out += direction;
+                out += "\n\tmicrostep: ";
+                out += motor->getMicrostep();
                 out += "\n\tstepsPerRev: ";
                 out += MOTORSTEPS;
+                out += "\n\tposition: ";
+                out += pos;
                 out += "\n}";
                 return out;
             };
@@ -163,7 +185,7 @@ class Axis {
 
         //used in tick function to start moves correctly
         long moveTime = 0; //how long to wait for next move
-        float startTime; //when move started
+        float startTime = 0; //when move started
 
         //list of motors
         vector<Stepper> motors;

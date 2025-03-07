@@ -78,12 +78,16 @@ void Axis::setupSensor(JsonVariant sensor) {
 void Axis::tick() {
     if (!init) {return;}
     for (ALLMOTORS) {
-        if (micros() >= i.timeForNextAction + i.prevActionTime) {
+        if (micros() >= i.timeForNextAction + i.prevActionTime && i.motor->getCurrentState() != 0) {
             i.timeForNextAction = i.motor->nextAction();
             i.prevActionTime = micros();
-            i.curPos += stepsToMM(i.motor->getStepsCompleted() - i.stepsDone);
+            i.curPos += i.dir * stepsToMM(i.motor->getStepsCompleted() - i.stepsDone);
+            //(currentMove.dist > 0) ? stepsToMM(i.motor->getStepsCompleted() - i.stepsDone) : -1*stepsToMM(i.motor->getStepsCompleted() - i.stepsDone);
             i.stepsDone = i.motor->getStepsCompleted();
         }
+    }
+    if (motors.at(0).motor->getCurrentState() == 0) {
+        currentMove = {};
     }
     if ((startTime + moveTime <= micros()) && !moveCommands.empty() && !suspended) {
         startNextMove();
@@ -91,13 +95,18 @@ void Axis::tick() {
 }
 
 void Axis::generalMove(move move) {
+    Serial.print("genMove: ");
+    Serial.println(move.dist, 5);
     if (!init) {return;}
     if (suspended) {
         for (ALLMOTORS) {
-            i.beginMove(move, this);
+            if (i.motor->getCurrentState() == 0) {
+                i.beginMove(move, this);
+            }
         }
+    } else {
+        moveCommands.push(move);
     }
-    moveCommands.push(move);
 }
 
 void Axis::delay(float time) {
@@ -123,20 +132,28 @@ void Axis::stop() {
     for (ALLMOTORS) {
         i.motor->stop();
     }
-    if (!suspended) {
-        currentMove = {};
-        moveCommands = {};
-    }
 }
 
 void Axis::suspend() {
-    if (suspended) {return;}
-    suspended = true;
     stop();
+    if (suspended) {return;}
     //if under suspend, just stop all motors, if not store the data
+    std::queue<move> temp = moveCommands;
+    moveCommands = {};
+    if (currentMove.type == 'r') {
+        currentMove.dist -= motors.at(0).curPos;
+    }
+    moveCommands.push(currentMove);
+    while (!temp.empty()) {
+        moveCommands.push(temp.front());
+        temp.pop();
+    }
+    Serial.println(printMoves());
+    suspended = true;
     stopPos = {};
     for (ALLMOTORS) {
         stopPos.push_back(i.curPos); //save stopped position
+        Serial.println("Suspend: saved: " + String(i.curPos));
     }
 }
 
@@ -149,15 +166,9 @@ void Axis::resume(bool restart) {
         stopPos = {};
         suspended = false;
     } else {
-        std::queue<move> temp = moveCommands;
-        moveCommands = {};
-        moveCommands.push(currentMove);
-        while (!temp.empty()) {
-            moveCommands.push(temp.front());
-            temp.pop();
-        }
         int j = 0;
         for (ALLMOTORS) {
+            Serial.println("Resume: motor at: " + String(stopPos.at(j)));
             i.beginMove({'a', stopPos.at(j), RESETTIME}, this);
             j++;
         }
@@ -184,11 +195,42 @@ String Axis::toString() {
     }
     out += "]\nsensor: ";
     out += levelSensor->toString();
+    out += "\nstate: ";
+    out += printState();
+    out += "}";
+    return out;
+}
+
+String Axis::printState() {
+    String out = "{\n\t";
+    out += (suspended) ? "suspended" : "active";
+    out += "\n\tcurrent move: ";
+    out += currentMove.toString();
+    out += "\n\tmove queue: ";
+    out += printMoves();
+    out += "\n\tsaved position: {";
+    for (auto i : stopPos) {
+        out += "\n\t\t";
+        out += i;
+    }
+    out += "\n}}";
+    return out;
+}
+
+String Axis::printMoves() {
+    String out = "{";
+    queue<move> temp = moveCommands;
+    while (!temp.empty()) {
+        out += temp.front().toString();
+        temp.pop();
+        Serial.println("loop");
+    }
     out += "}";
     return out;
 }
 
 void Axis::startNextMove() {
+    Serial.println("startNextMove");
     currentMove = moveCommands.front();
     moveCommands.pop();
     moveTime = currentMove.time*1000000L;

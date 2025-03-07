@@ -5,19 +5,18 @@
             "maxpos": 400,
             "0offset": 0,
             "steplen": 0.2,
-            "microstep": 1,
+            "microstep": 16,
             "maxspeed": 240,
             "level": "1"
         },
         "motors": [{
             "driver": "DRV8825",
-            "pins": [2,15],
+            "pins": [2, 15, 4, 12, 13],
             "direction": "fwd",
             "stepsPerRev": 200
         }],
         "sensor": {
-            "type": "limitSwitch",
-            "input": 12
+            "type": "noSensor"
         }
     }]
 }

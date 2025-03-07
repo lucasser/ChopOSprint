@@ -29,6 +29,5 @@ void loop() {
     Serial.println(in);
     printer.processCommand(in);
   }
-
-  //axis.tick();
+  printer.tick();
 }

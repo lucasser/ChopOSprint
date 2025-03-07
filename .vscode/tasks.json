@@ -1,0 +1,17 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "PlatformIO",
+			"task": "Upload and Monitor (esp32doit-devkit-v1)",
+			"problemMatcher": [
+				"$platformio"
+			],
+			"label": "PlatformIO: Upload and Monitor (esp32doit-devkit-v1)",
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			}
+		}
+	]
+}

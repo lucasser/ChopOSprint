@@ -22,8 +22,8 @@
         }],
         "sensor": {
             "type": "crtouch",
-            "pwm": 15,
-            "signal": 12
+            "pwm": 32,
+            "signal": 33
         }
     }]
 }
