@@ -8,15 +8,15 @@ void Printer::setupAxis(JsonVariant config) {
   JsonArray axis(config["axis"]);
   for (JsonVariant i : axis) {
     char id = i["id"];
-    AXIS.at(AXISBYID).loadConfig(i);
+    AXIS.at(AXISBYID) = new Axis(i);
     activeAxis.push_back(id);
   }
   //[TODO]: setup heating stuff
 }
 
 Axis* Printer::getAxis(int id) {
-  if (AXIS.at(id).init) {
-    return &AXIS.at(id);
+  if (AXIS.at(id)->init) {
+    return AXIS.at(id);
   }
   return nullptr;
 }
@@ -28,8 +28,8 @@ void Printer::tick() {
 }
 
 Axis* Printer::getAxis(char id) {
-  if (AXIS.at(AXISBYID).init) {
-    return &AXIS.at(AXISBYID);
+  if (AXIS.at(AXISBYID)->init) {
+    return AXIS.at(AXISBYID);
   }
   return nullptr;
 }

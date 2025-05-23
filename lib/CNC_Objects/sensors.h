@@ -15,9 +15,11 @@
     To add more:
 
     class yourSensor : public Sensor;
-    required functions: constructor, registerInterrupt
-
-
+    required functions:
+        constructor - register pins, setup
+        prep() - run before starting to level
+        stow() - run after leveling, make sure to set detected to false
+        toString() - print out sensor data
 */
 
 #include <ESP32Servo.h>

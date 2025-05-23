@@ -4,3 +4,6 @@
 .vscode/launch.json
 .vscode/ipch
 build
+data/config.json
+config/configtest.json
+.vscode/settings.json

@@ -11,6 +11,10 @@ Axis::Axis(JsonVariant config) {
 //[TODO]: delete all pointers to motors in motors vector
 Axis::~Axis() {
     delete levelSensor;
+    for (ALLMOTORS) {
+        delete i->motor;
+        delete i;
+    }
 }
 
 void Axis::loadConfig(JsonVariant config) {
@@ -45,22 +49,22 @@ void Axis::loadConfig(JsonVariant config) {
 
 //[TODO?]: add support for enable pin
 void Axis::setupMotor(JsonVariant stepper) {
-    Stepper mot;
+    Stepper* mot = new Stepper();
 
-    mot.MOTORSTEPS = stepper["stepsPerRev"];
-    mot.direction = (stepper["direction"] == "rev") ? -1 : 1;
+    mot->MOTORSTEPS = stepper["stepsPerRev"];
+    mot->direction = (stepper["direction"] == "rev") ? -1 : 1;
 
     String driver = stepper["driver"];
     if (driver == "DRV8825") {
         if (stepper["pins"].size() == 2) {
-            mot.motor = new DRV8825(mot.MOTORSTEPS, stepper["pins"][0], stepper["pins"][1]);
+            mot->motor = new DRV8825(mot->MOTORSTEPS, stepper["pins"][0], stepper["pins"][1]);
         } else {
-            mot.motor = new DRV8825(mot.MOTORSTEPS, stepper["pins"][0], stepper["pins"][1], stepper["pins"][2], stepper["pins"][3], stepper["pins"][4]);
+            mot->motor = new DRV8825(mot->MOTORSTEPS, stepper["pins"][0], stepper["pins"][1], stepper["pins"][2], stepper["pins"][3], stepper["pins"][4]);
         }
     }
     //[TODO]: Add more supported drivers
-    mot.motor->setRPM(maxSpeed);
-    mot.motor->setMicrostep(microstep);
+    mot->motor->setRPM(maxSpeed);
+    mot->motor->setMicrostep(microstep);
     motors.push_back(mot);
 }
 
@@ -78,15 +82,15 @@ void Axis::setupSensor(JsonVariant sensor) {
 void Axis::tick() {
     if (!init) {return;}
     for (ALLMOTORS) {
-        if (micros() >= i.timeForNextAction + i.prevActionTime && i.motor->getCurrentState() != 0) {
-            i.timeForNextAction = i.motor->nextAction();
-            i.prevActionTime = micros();
-            i.curPos += i.dir * stepsToMM(i.motor->getStepsCompleted() - i.stepsDone);
+        if (micros() >= i->timeForNextAction + i->prevActionTime && i->motor->getCurrentState() != 0) {
+            i->timeForNextAction = i->motor->nextAction();
+            i->prevActionTime = micros();
+            i->curPos += i->dir * stepsToMM(i->motor->getStepsCompleted() - i->stepsDone);
             //(currentMove.dist > 0) ? stepsToMM(i.motor->getStepsCompleted() - i.stepsDone) : -1*stepsToMM(i.motor->getStepsCompleted() - i.stepsDone);
-            i.stepsDone = i.motor->getStepsCompleted();
+            i->stepsDone = i->motor->getStepsCompleted();
         }
     }
-    if (motors.at(0).motor->getCurrentState() == 0) {
+    if (motors.at(0)->motor->getCurrentState() == 0) {
         currentMove = {};
     }
     if ((startTime + moveTime <= micros()) && !moveCommands.empty() && !suspended) {
@@ -100,12 +104,12 @@ void Axis::generalMove(move move) {
     if (!init) {return;}
     if (suspended) {
         for (ALLMOTORS) {
-            if (i.motor->getCurrentState() == 0) {
-                i.beginMove(move, this);
+            if (i->motor->getCurrentState() == 0) {
+                i->beginMove(move, this);
             }
         }
     } else {
-        moveCommands.push(move);
+        moveCommands.push_back(move);
     }
 }
 
@@ -121,16 +125,16 @@ void Axis::level() {
 void Axis::zero(int id) {
     if (id == -1){
         for (ALLMOTORS) {
-            i.curPos = offset;
+            i->curPos = offset;
         }
     } else if (id < motors.size()) {
-        motors[id].curPos = offset;
+        motors.at(id)->curPos = offset;
     }
 }
 
 void Axis::stop() {
     for (ALLMOTORS) {
-        i.motor->stop();
+        i->motor->stop();
     }
 }
 
@@ -138,22 +142,16 @@ void Axis::suspend() {
     stop();
     if (suspended) {return;}
     //if under suspend, just stop all motors, if not store the data
-    std::queue<move> temp = moveCommands;
-    moveCommands = {};
     if (currentMove.type == 'r') {
-        currentMove.dist -= motors.at(0).curPos;
+        currentMove.dist -= motors.at(0)->curPos;
     }
-    moveCommands.push(currentMove);
-    while (!temp.empty()) {
-        moveCommands.push(temp.front());
-        temp.pop();
-    }
+    moveCommands.push_front(currentMove);
     Serial.println(printMoves());
     suspended = true;
     stopPos = {};
     for (ALLMOTORS) {
-        stopPos.push_back(i.curPos); //save stopped position
-        Serial.println("Suspend: saved: " + String(i.curPos));
+        stopPos.push_back(i->curPos); //save stopped position
+        Serial.println("Suspend: saved: " + String(i->curPos));
     }
 }
 
@@ -169,7 +167,7 @@ void Axis::resume(bool restart) {
         int j = 0;
         for (ALLMOTORS) {
             Serial.println("Resume: motor at: " + String(stopPos.at(j)));
-            i.beginMove({'a', stopPos.at(j), RESETTIME}, this);
+            i->beginMove({'a', stopPos.at(j), RESETTIME}, this);
             j++;
         }
         moveTime = 5000000L;
@@ -191,7 +189,7 @@ String Axis::toString() {
     out += maxSpeed;
     out += "\n}\nmotors: [";
     for (ALLMOTORS) {
-        out += i.toString();
+        out += i->toString();
     }
     out += "]\nsensor: ";
     out += levelSensor->toString();
@@ -219,10 +217,10 @@ String Axis::printState() {
 
 String Axis::printMoves() {
     String out = "{";
-    queue<move> temp = moveCommands;
+    deque<move> temp = moveCommands;
     while (!temp.empty()) {
         out += temp.front().toString();
-        temp.pop();
+        temp.pop_front();
         Serial.println("loop");
     }
     out += "}";
@@ -232,10 +230,10 @@ String Axis::printMoves() {
 void Axis::startNextMove() {
     Serial.println("startNextMove");
     currentMove = moveCommands.front();
-    moveCommands.pop();
+    moveCommands.pop_front();
     moveTime = currentMove.time*1000000L;
     startTime = micros();
     for (ALLMOTORS) {
-        i.beginMove(currentMove, this);
+        i->beginMove(currentMove, this);
     }
 }

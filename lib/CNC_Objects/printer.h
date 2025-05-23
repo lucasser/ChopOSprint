@@ -49,9 +49,8 @@ class Printer {
         **/
         Axis* getAxis(int id);
 
-        //[TODO?]: dynamically allocate a vector to store the axis. then any identifier will work.
         const unordered_map<char, int> axismap = AXISORDER; //maps axis name to array index
-        array<Axis, AXISAMOUNT> AXIS = {}; //Stores all the axis controlled by the esp. Do not pass Axis by value, only by refference.
+        array<Axis*, AXISAMOUNT> AXIS = {}; //Stores all the axis controlled by the esp. Do not pass Axis by value, only by reference.
         vector<char> activeAxis = {};
 };
 
