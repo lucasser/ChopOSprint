@@ -4,7 +4,7 @@
 
 Command list:
 Move
-legal: m a x10, m a t10 x10
+legal: ma x10, mr t10 x10
 
 - Relative/absolute
 - {Axis, Pos}
@@ -32,6 +32,10 @@ Resume (r)
 
 - keep/trash move queue (k,t)
 - axis id, a for all
+
+Print (p)
+
+- prints the printer config+state
 
 ## Esp -> rpi
 

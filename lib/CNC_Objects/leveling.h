@@ -8,6 +8,7 @@
 //level axis that has one probing location/no sensor
 //"1" in config
 void level1pos(Axis* axis) {
+    Serial.println("1 leveled");
     if (axis->levelSensor->detect()) {
         axis->zero();
         return;
@@ -15,14 +16,18 @@ void level1pos(Axis* axis) {
     axis->generalMove({'r', 10, 0});
     axis->levelSensor->prep();
     axis->generalMove({'r', -1000, 0});
-    while (!axis->levelSensor->detect()) {}
+    while (!axis->levelSensor->detect()) {
+        axis->tick(); //keep ticking the axis until the sensor is triggered
+    }
     axis->stop();
     axis->levelSensor->stow();
     axis->zero();
     axis->generalMove({'r', 10, 0});
     axis->levelSensor->prep();
     axis->generalMove({'r', -1000, 500}); //[TODO?]: adjust speed
-    while (!axis->levelSensor->detect()) {}
+    while (!axis->levelSensor->detect()) {
+        axis->tick(); //keep ticking the axis until the sensor is triggered
+    }
     axis->stop();
     axis->levelSensor->stow();
     axis->zero();

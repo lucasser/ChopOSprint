@@ -36,6 +36,7 @@ Axis* Printer::getAxis(char id) {
 
 void Printer::processCommand(String& in) {
   char command = in.charAt(0);
+  Serial.println(in.length());
   if (in.length() < 3) {
     return;
   }

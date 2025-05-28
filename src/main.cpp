@@ -24,10 +24,12 @@ void setup() {
 }
 
 void loop() {
+  //[TODO]: offcore --
   while (Serial.available()) {
     String in = Serial.readString();
     Serial.println(in);
     printer.processCommand(in);
   }
+  //------------------
   printer.tick();
 }

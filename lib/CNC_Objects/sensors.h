@@ -1,8 +1,8 @@
 /*Classes for different sensors
     CR Touch
         type: "crtouch"
-        pwm:
-        signal:
+        pwm (sig):
+        signal (out):
 
     limit switch:
         type: "limitSwitch"
