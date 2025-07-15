@@ -1,22 +1,29 @@
 {
     "axis": [{
-        "id":"x",
+        "id":"z",
         "axis": {
             "maxpos": 400,
             "0offset": 0,
             "steplen": 0.2,
-            "microstep": 16,
+            "microstep": 1,
             "maxspeed": 240,
-            "level": "1"
+            "level": "a"
         },
         "motors": [{
             "driver": "DRV8825",
-            "pins": [2, 15, 4, 12, 13],
+            "pins": [2,15],
+            "direction": "rev",
+            "stepsPerRev": 200
+        }, {
+            "driver": "DRV8825",
+            "pins": [4,13],
             "direction": "fwd",
             "stepsPerRev": 200
         }],
         "sensor": {
-            "type": "noSensor"
+            "type": "crtouch",
+            "pwm": 32,
+            "signal": 33
         }
     }]
 }

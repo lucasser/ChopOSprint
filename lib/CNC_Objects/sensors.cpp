@@ -15,10 +15,10 @@ void CRTouch::prep() {
 }
 
 void CRTouch::stow() {
-  detected = false;
   sensor.write(90);
   delay(10);
   detachInterrupt(digitalPinToInterrupt(input));
+  detected = false;
 }
 
 String CRTouch::toString() {
@@ -46,8 +46,8 @@ void LimitSwitch::prep() {
 }
 
 void LimitSwitch::stow() {
-  detected = false;
   detachInterrupt(digitalPinToInterrupt(input));
+  detected = false;
 }
 
 String LimitSwitch::toString() {

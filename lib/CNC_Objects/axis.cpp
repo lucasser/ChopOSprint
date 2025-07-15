@@ -1,5 +1,4 @@
 #include "axis.h"
-#include <leveling.h>
 #include <DRV8825.h>
 
 Axis::Axis() {}
@@ -27,14 +26,7 @@ void Axis::loadConfig(JsonVariant config) {
     microstep = axis["microstep"];
     maxSpeed = axis["maxspeed"];
     String level = axis["level"];
-
-    if (level == "2Local") {
-        levelFunction = &level2posLocal;
-    } else if (level == "2Serial") {
-        levelFunction = &level2posSerial;
-    } else {
-        levelFunction = &level1pos;
-    }
+	leveler = getLeveler(level, this);
 
     //motors
     JsonArray motors = config["motors"];
@@ -90,10 +82,14 @@ void Axis::tick() {
             i->stepsDone = i->motor->getStepsCompleted();
         }
     }
-    if (motors.at(0)->motor->getCurrentState() == 0) {
+    if (startTime + moveTime <= micros()) {
+		moving = false;
         currentMove = {};
     }
-    if ((startTime + moveTime <= micros()) && !moveCommands.empty() && !suspended) {
+	if (leveling) {
+		leveling = !leveler->tick();
+	}
+    if (!moving && !moveCommands.empty() && !suspended && !leveling) {
         startNextMove();
     }
 }
@@ -103,11 +99,9 @@ void Axis::generalMove(move move) {
     Serial.println(move.dist, 5);
     if (!init) {return;}
     if (suspended) {
-        for (ALLMOTORS) {
-            if (i->motor->getCurrentState() == 0) {
-                i->beginMove(move, this);
-            }
-        }
+		if (!moving) {
+			moveMotors(move);
+		}
     } else {
         moveCommands.push_back(move);
     }
@@ -118,8 +112,8 @@ void Axis::delay(float time) {
 }
 
 void Axis::level() {
-    (*levelFunction)(this);
-    Serial.println("leveled :D");
+	leveling = true;
+    Serial.println("started level");
 }
 
 void Axis::zero(int id) {
@@ -136,6 +130,7 @@ void Axis::stop() {
     for (ALLMOTORS) {
         i->motor->stop();
     }
+	moving = false;
 }
 
 void Axis::suspend() {
@@ -148,11 +143,8 @@ void Axis::suspend() {
     moveCommands.push_front(currentMove);
     Serial.println(printMoves());
     suspended = true;
-    stopPos = {};
-    for (ALLMOTORS) {
-        stopPos.push_back(i->curPos); //save stopped position
-        Serial.println("Suspend: saved: " + String(i->curPos));
-    }
+    stopPos = motors.at(0)->curPos;
+    Serial.println("Suspend: saved: " + String(stopPos));
 }
 
 void Axis::resume(bool restart) {
@@ -163,13 +155,10 @@ void Axis::resume(bool restart) {
         moveCommands = {};
         stopPos = {};
         suspended = false;
+        moveTime = 0;
+        startTime = 0;
     } else {
-        int j = 0;
-        for (ALLMOTORS) {
-            Serial.println("Resume: motor at: " + String(stopPos.at(j)));
-            i->beginMove({'a', stopPos.at(j), RESETTIME}, this);
-            j++;
-        }
+		moveMotors({'a', stopPos, RESETTIME});
         moveTime = 5000000L;
         startTime = micros();
         suspended = false;
@@ -206,12 +195,9 @@ String Axis::printState() {
     out += currentMove.toString();
     out += "\n\tmove queue: ";
     out += printMoves();
-    out += "\n\tsaved position: {";
-    for (auto i : stopPos) {
-        out += "\n\t\t";
-        out += i;
-    }
-    out += "\n}}";
+    out += "\n\tsaved position: ";
+    out += stopPos;
+    out += "\n}";
     return out;
 }
 
@@ -231,9 +217,27 @@ void Axis::startNextMove() {
     Serial.println("startNextMove");
     currentMove = moveCommands.front();
     moveCommands.pop_front();
-    moveTime = currentMove.time*1000000L;
-    startTime = micros();
-    for (ALLMOTORS) {
-        i->beginMove(currentMove, this);
-    }
+	moveMotors(currentMove);
+}
+
+void Axis::moveMotors(Axis::move move) {
+	int steps = 0;
+	moving = true;
+
+	for (ALLMOTORS) {
+		if (move.type == 'r') {
+			steps = mmToSteps(move.dist);
+		} else if (move.type == 'a') {
+			steps = mmToSteps(move.dist - i->curPos);
+		}
+		i->beginMove(steps, move.time);
+	}
+
+	//Set timing control for move
+	moveTime = move.time*1000000L;
+	startTime = micros();
+	if (move.time == 0) {
+		moveTime = motors.at(0)->motor->getTimeForMove(steps);
+	}
+
 }

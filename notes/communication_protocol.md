@@ -37,6 +37,8 @@ Print (p)
 
 - prints the printer config+state
 
+- -e on anything means give response
+
 ## Esp -> rpi
 
 Move another axis

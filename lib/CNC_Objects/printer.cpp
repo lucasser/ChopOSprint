@@ -1,4 +1,4 @@
-#include "printer.h"
+#include <printer.h>
 
 void Printer::loadConfig(JsonDocument& config) {
   setupAxis(config);
@@ -42,7 +42,8 @@ void Printer::processCommand(String& in) {
   }
   if (command == 'l') { //Level
     Serial.println("level");
-    getAxis(in.charAt(2))->level();
+	Axis* tolevel = getAxis(in.charAt(2));
+    tolevel->level();
   } else if (command == 't') { //Toolhead
     Serial.println("tool");
   } else if (command == 'u') { //Configs

@@ -7,7 +7,7 @@ Main code for printer
 #include <config.h>
 #include <printer.h>
 
-Printer printer;
+Printer* printer = new Printer();
 
 void setup() {
   //load config document from SPIFFS
@@ -19,7 +19,7 @@ void setup() {
   Serial.setTimeout(1);
 
   //register appropriate axis
-  printer.loadConfig(config);
+  printer->loadConfig(config);
   Serial.println("on");
 }
 
@@ -28,8 +28,8 @@ void loop() {
   while (Serial.available()) {
     String in = Serial.readString();
     Serial.println(in);
-    printer.processCommand(in);
+    printer->processCommand(in);
   }
   //------------------
-  printer.tick();
+  printer->tick();
 }

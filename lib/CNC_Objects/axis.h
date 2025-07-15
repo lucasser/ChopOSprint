@@ -14,6 +14,7 @@ Header file for everything to do with stepper motors:
 #include "arduinoJsonChar.h"
 #include <vector>
 #include <sensors.h>
+#include <leveling.h>
 #include <memory>
 #include "../../config/config.h"
 
@@ -94,11 +95,32 @@ class Axis {
         //prints out info about the axis
         String toString();
 
+        /**
+         * @brief Get number of scheduled moves
+         *
+         * @return number of moves in the move queue
+         */
+        int getNumMoves() {
+            return moveCommands.size();
+        }
+
+        /**
+         * @brief Get the current move being executed
+         *
+         * @return the current move
+         */
+        move getCurrentMove() {
+            return currentMove;
+        }
+
     //helper functions
     private:
         //begins next move
         void startNextMove();
+		//tell motors to move
+		void moveMotors(Axis::move move);
         //convert millimeter input into motor steps
+		//[TODO]: Account for microstepping???
         int mmToSteps(float mm) {
             return mm/stepLen;
         }
@@ -123,6 +145,10 @@ class Axis {
         bool init = false;
         //pointer to sensor
         Sensor* levelSensor;
+		//Which level function to use
+		String levelType;
+		//has axis finished move?
+		bool moving = false;
 
     //internal state variables
     private:
@@ -140,19 +166,13 @@ class Axis {
             int direction = 1; //1 for forward, -1 for reverse
 
             //correctly register the move (absolute or relative)
-            void beginMove(Axis::move move, Axis* axis) {
-                float dist;
-                if (move.type == 'r') {
-                    dist = axis->mmToSteps(move.dist);
-                } else if (move.type == 'a') {
-                    dist = axis->mmToSteps(move.dist - curPos);
-                }
-                motor->startMove(direction*dist, move.time*1000000L);
-                Serial.println("registered move: " + String(dist));
+            void beginMove(float steps, float time) {
+                motor->startMove(direction*steps, time*1000000L);
+                Serial.println("registered move: " + String(steps));
                 prevActionTime = micros();
                 timeForNextAction = 0;
                 stepsDone = 0;
-                dir = (dist > 0) ? 1 : -1;
+                dir = (steps > 0) ? 1 : -1;
             };
 
             //prints out all motor data
@@ -183,8 +203,6 @@ class Axis {
         //keep track of dynamic axis state//
         int microstep = 1; //the microstepping situation
 
-        void (*levelFunction)(Axis*);
-
         //used in tick function to start moves correctly
         long moveTime = 0; //how long to wait for next move
         float startTime = 0; //when move started
@@ -197,33 +215,12 @@ class Axis {
 
         //Suspend data//
         //positions that motors were stopped on
-        vector<float> stopPos;
+        float stopPos = 0; //absolute position of the axis when stopped
 
+		//state tracking
         bool suspended = false; //is the axis in suspend state
-};
-
-//contains 4 coordinates for 4 axis, and time for the move. Absolute positions only
-struct moveCommand{
-    moveCommand() {
-        for (auto i : coords) {
-            i = NAN;
-        }
-    };
-    char type; //relative or absolute
-    std::array<float, AXISAMOUNT> coords; //stores positions for a move. size configurable in config.h
-    float time = 0;
-    String toString() {
-        String out = "time: ";
-        out += time;
-        out += ", type: ";
-        out += type;
-        out += ", coords: ";
-        for (float x : coords) {
-            out += x;
-            out += ", ";
-        }
-        return out;
-    }
+		bool leveling = false; //is the axis currently leveling
+		Leveler* leveler = nullptr; //pointer to the leveler object
 };
 
 #endif //axis
